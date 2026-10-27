@@ -68,15 +68,15 @@
       var m = Math.ceil((now.getHours() * 60 + now.getMinutes() + 30) / 30) * 30;
       return Math.max(OPEN_FROM, m);
     };
-    // 日付の一覧（日曜日と、もう時間が残っていない今日は出さない）
+    // 日付の一覧：明日から（今日のご希望はお電話で）。日曜日は出さない
     var dateOptions = function (selected) {
       var h = '<option value="">選択してください</option>';
       var d = new Date();
-      for (var i = 0; i < DATE_DAYS; i++, d.setDate(d.getDate() + 1)) {
+      d.setDate(d.getDate() + 1);
+      for (var i = 1; i <= DATE_DAYS; i++, d.setDate(d.getDate() + 1)) {
         var v = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
         if (d.getDay() === CLOSED_DAY) { continue; }
-        if (i === 0 && firstFrom(v) > OPEN_TO - 60) { continue; }
-        h += '<option value="' + v + '"' + (selected === v ? ' selected' : '') + '>' + dateLabel(v) + (i === 0 ? '・今日' : '') + '</option>';
+        h += '<option value="' + v + '"' + (selected === v ? ' selected' : '') + '>' + dateLabel(v) + (i === 1 ? '・明日' : '') + '</option>';
       }
       return h;
     };
@@ -266,7 +266,9 @@
       },
       call: function () {
         return '<h2 class="line-dialog__title" id="line-dialog-title">お電話の<wbr>ご希望を<wbr>教えてください</h2>' +
-          '<p class="line-dialog__lead">お電話は<wbr>9:00〜17:00の間で<wbr>お選びください。<wbr>日曜日は<wbr>定休日です。</p>' +
+          '<p class="line-dialog__lead">明日以降の<wbr>9:00〜17:00の間で<wbr>お選びください。<wbr>日曜日は<wbr>定休日です。</p>' +
+          '<p class="line-dialog__urgent">本日中の<wbr>ご希望・<wbr>お急ぎの方は、<wbr>お電話ください。<br>' +
+          '<a href="tel:0867445552">真庭 <span class="nw">0867-44-5552</span></a><a href="tel:0868201653">津山支店 <span class="nw">0868-20-1653</span></a></p>' +
           '<div class="line-form">' +
           '<label class="line-form__label" for="lf-date">ご希望の日</label>' +
           '<select class="line-form__input" id="lf-date">' + dateOptions(state.date) + '</select>' +
