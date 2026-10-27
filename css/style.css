@@ -585,24 +585,24 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
   .rental-pop__big { font-size: 17px; }
 }
 @media (prefers-reduced-motion: no-preference) {
-  .rental-pop__inner { animation: pop-spin 7s ease-in-out 2s infinite; }
-  .rental-pop__dryer { animation: pop-shake 7s linear 2s infinite; }
-  .rental-pop__led { animation: pop-led 7s linear 2s infinite; }
+  .rental-pop__inner { animation: pop-spin 4s ease-in-out 1s infinite; }
+  .rental-pop__dryer { animation: pop-shake 4s linear 1s infinite; }
+  .rental-pop__led { animation: pop-led 4s linear 1s infinite; }
   .intro-on:not(.intro-leaving) .rental-pop__inner,
   .intro-on:not(.intro-leaving) .rental-pop__dryer,
   .intro-on:not(.intro-leaving) .rental-pop__led { animation-play-state: paused; }
 }
-/* 7秒ごと：しばらく止まって読める → 2回転（乾燥中）→ 止まる */
+/* 4秒ごと：約1.6秒止まって読める → 約2秒で2回転（乾燥中）→ 止まる */
 @keyframes pop-spin {
-  0%, 60% { transform: rotate(0deg); }
-  92%, 100% { transform: rotate(720deg); }
+  0%, 40% { transform: rotate(0deg); }
+  90%, 100% { transform: rotate(720deg); }
 }
 @keyframes pop-shake {
-  0%, 60%, 92%, 100% { transform: none; }
-  64%, 72%, 80%, 88% { transform: translate(.6px, 0); }
-  68%, 76%, 84% { transform: translate(-.6px, 0); }
+  0%, 40%, 90%, 100% { transform: none; }
+  45%, 55%, 65%, 75%, 85% { transform: translate(.6px, 0); }
+  50%, 60%, 70%, 80% { transform: translate(-.6px, 0); }
 }
-@keyframes pop-led { 0%, 59% { fill: #4cd07d; } 60%, 91% { fill: #ff9f43; } 92%, 100% { fill: #4cd07d; } }
+@keyframes pop-led { 0%, 39% { fill: #4cd07d; } 40%, 89% { fill: #ff9f43; } 90%, 100% { fill: #4cd07d; } }
 .rental-badge {
   display: inline-block; margin: 0 0 14px; padding: 4px 16px; border-radius: 999px;
   background: #fee350; color: #1f2a44; font-size: .9rem; font-weight: 700; letter-spacing: .06em;
