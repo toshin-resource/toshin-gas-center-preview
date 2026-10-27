@@ -77,11 +77,20 @@
       return (d.getMonth() + 1) + '月' + d.getDate() + '日（' + WEEK[d.getDay()] + '）';
     };
     var steps = function () {
-      var s = ['topic', 'detail', 'area', 'method'];
+      // 「もっと知りたい」「その他」は内容が相談の中心なので最初に、
+      // 無料レンタル・購入検討の「ご質問・ご要望（任意）」は最後（お名前のあと）に聞く
+      var detailFirst = state.topic === TOPIC_KNOW || state.topic === TOPIC_OTHER;
+      var s = ['topic'];
+      if (detailFirst) { s.push('detail'); }
+      s.push('area', 'method');
       if (state.method === '電話') { s.push('call'); }
-      s.push('name', 'confirm');
+      s.push('name');
+      if (!detailFirst) { s.push('detail'); }
+      s.push('confirm');
       return s;
     };
+    // 次が確認画面なら「内容を確認する」、それ以外は「次へ」
+    var nextLabel = function () { return steps()[stepIndex + 1] === 'confirm' ? '内容を確認する' : '次へ'; };
     var message = function () {
       var t = LINE_TOPICS[state.topic];
       var area = state.area === 'その他' ? 'その他' + (state.areaOther ? '（' + state.areaOther + '）' : '') : state.area;
@@ -181,13 +190,13 @@
         // 無料レンタル・購入検討：ご質問・ご要望の自由記入（任意。空のまま次へ進める）
         if (state.topic !== TOPIC_KNOW && state.topic !== TOPIC_OTHER) {
           return '<h2 class="line-dialog__title" id="line-dialog-title">ご質問・ご要望が<wbr>あれば<wbr>ご記入ください</h2>' +
-            '<p class="line-dialog__lead">なければ、<wbr>そのまま<wbr>「次へ」で<wbr>大丈夫です。</p>' +
+            '<p class="line-dialog__lead">なければ、<wbr>そのまま<wbr>「' + nextLabel() + '」で<wbr>大丈夫です。</p>' +
             '<div class="line-form">' +
             '<label class="line-form__label" for="lf-detail">ご質問・ご要望<span class="line-form__opt">（自由記入・任意）</span></label>' +
             '<textarea class="line-form__input line-form__textarea" id="lf-detail" rows="4" placeholder="' +
             (state.topic === 0 ? '例：レンタルの期間を知りたいです' : '例：9kgと6kgで迷っています') + '">' + esc(state.detail || '') + '</textarea>' +
             '<p class="line-form__error" role="alert" data-error></p>' +
-            '<button type="button" class="btn btn--line line-dialog__next" data-next>次へ</button></div>';
+            '<button type="button" class="btn btn--line line-dialog__next" data-next>' + nextLabel() + '</button></div>';
         }
         var text = '<label class="line-form__label" for="lf-detail">' +
           (state.topic === TOPIC_KNOW ? 'ご質問・ご要望<span class="line-form__opt">（自由記入・任意）</span>' : 'ご相談内容') + '</label>' +
@@ -248,7 +257,7 @@
           '<label class="line-form__label" for="lf-name">お名前</label>' +
           '<input class="line-form__input" id="lf-name" type="text" autocomplete="name" placeholder="例：瀬島 祐介" value="' + esc(state.name || '') + '">' +
           '<p class="line-form__error" role="alert" data-error></p>' +
-          '<button type="button" class="btn btn--line line-dialog__next" data-next>内容を確認する</button></div>';
+          '<button type="button" class="btn btn--line line-dialog__next" data-next>' + nextLabel() + '</button></div>';
       },
       confirm: function () {
         var notice = state.method === 'LINE' ? '<p class="line-dialog__notice">※⁠LINEでの<wbr>ご返信は、<wbr>少しお時間を<wbr>いただく場合が<wbr>あります。<wbr>あらかじめ<wbr>ご了承ください。</p>' : '';
