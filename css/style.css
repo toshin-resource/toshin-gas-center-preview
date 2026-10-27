@@ -728,6 +728,13 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 .intro__walk { position: absolute; left: 4%; bottom: 11.7%; width: 28%; }
 .intro__sway img { display: block; width: 100%; height: auto; }
 .intro__caption { margin-top: 6px; text-align: center; }
+/* 上の「乾太くん 取扱店」の表示 */
+.intro__head { margin-bottom: clamp(4px, 3vh, 28px); text-align: center; }
+.intro__kicker { display: inline-block; margin: 0 0 8px; padding: 3px 14px; border: 1.5px solid var(--c-accent); border-radius: 999px; font-size: clamp(.78rem, 3.4vw, .95rem); font-weight: 700; color: var(--c-accent); letter-spacing: .08em; background: #fff; }
+.intro__title { margin: 0; font-size: clamp(1.7rem, 8vw, 2.6rem); font-weight: 900; line-height: 1.25; color: var(--c-logo-navy); letter-spacing: .06em; }
+.intro__shop { margin: 8px 0 0; font-size: clamp(.85rem, 3.8vw, 1.05rem); font-weight: 700; color: var(--c-muted); letter-spacing: .04em; }
+/* 縦が短い画面（小さいスマホ）では詰めて、スキップボタンと重ならないように */
+@media (max-height: 640px) { .intro__inner { width: min(84vw, 560px); } .intro__head { margin-bottom: 0; } .intro__kicker { margin-bottom: 4px; } .intro__shop { margin-top: 4px; } }
 .intro__catch { font-size: clamp(1.25rem, 5vw, 1.9rem); font-weight: 700; color: var(--c-accent); letter-spacing: .08em; margin: 0 0 10px; }
 .intro__logo { display: block; height: 34px; width: auto; margin: 0 auto; }
 .intro__skip {
@@ -739,7 +746,7 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 
 /* 時間割（7秒）：0.2s 登場 → 1.35s Tシャツを入れる → 2.1〜4.4s 乾燥 → 4.5s ピピッ → 4.8s Tシャツが出てくる → 5.4s ジャンプ
    再生はページの読み込み後（html に .intro-play が付いてから）。それまでは舞台を隠しておく */
-.intro__stage, .intro__caption { visibility: hidden; }
+.intro__stage, .intro__caption, .intro__head { visibility: hidden; }
 .intro-play .intro__stage { visibility: visible; }
 .intro__walk, .intro__bob, .intro__sway { will-change: transform; }
 .intro__bob { transform-origin: 50% 100%; }
@@ -765,6 +772,7 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 .intro-play .intro__out-s { animation: out-s 7s both; transform-box: fill-box; transform-origin: center; }
 .intro-play .intro__sparkles path { animation: intro-spark 7s both; transform-box: fill-box; transform-origin: center; }
 .intro-play .intro__sparkles path:nth-child(2n) { animation-delay: .18s; }
+.intro-play .intro__head { visibility: visible; animation: intro-cap .8s .1s cubic-bezier(.2,.7,.2,1) both; }
 .intro-play .intro__caption { visibility: visible; animation: intro-cap .8s .3s cubic-bezier(.2,.7,.2,1) both; } /* キャッチコピーとロゴは最初から表示 */
 
 @keyframes intro-pop { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
