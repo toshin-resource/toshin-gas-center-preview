@@ -561,28 +561,28 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
 @keyframes fade-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 
 /* ---------- お試し無料レンタル中のポップ ---------- */
-/* 全ページの右下に固定。乾太くん（乾燥機）の絵で、ふちはトーシンガスのロゴの6色。
+/* 全ページの右下に固定。乾太くん（デラックスタイプ：操作部が下）の絵で、ふちはトーシンガスのロゴの6色。
    ドアの窓の中に文字を入れ、ときどきドラムのように回して「乾燥中」に見せる */
 .rental-pop {
   position: fixed; z-index: 80; right: 14px; bottom: 14px;
-  width: 108px; height: 121px; display: block; text-decoration: none; color: #fff;
+  width: 116px; height: 116px; display: block; text-decoration: none; color: #fff;
   filter: drop-shadow(0 6px 12px rgba(29, 32, 135, .28));
 }
 .rental-pop__dryer { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .rental-pop__inner {
   /* ドアの窓（絵の中の円）にぴったり重ねる。古いブラウザでもずれないよう高さも数値で指定 */
-  position: absolute; left: 15%; width: 70%; top: 27.68%; height: 62.5%; border-radius: 50%;
+  position: absolute; left: 17%; width: 62%; top: 12%; height: 62%; border-radius: 50%;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
   text-align: center; white-space: nowrap; word-break: keep-all;
 }
-.rental-pop__small { display: block; font-size: 9px; font-weight: 700; line-height: 1.15; letter-spacing: 0; color: #fff; }
-.rental-pop__big { display: block; font-size: 20px; font-weight: 900; line-height: 1.05; letter-spacing: .02em; color: #fee350; }
+.rental-pop__small { display: block; font-size: 8.5px; font-weight: 700; line-height: 1.15; letter-spacing: 0; color: #fff; }
+.rental-pop__big { display: block; font-size: 19px; font-weight: 900; line-height: 1.05; letter-spacing: .02em; color: #fee350; }
 .rental-pop:hover, .rental-pop:focus-visible { color: #fff; filter: drop-shadow(0 8px 16px rgba(29, 32, 135, .4)); }
 @media (max-width: 900px) {
   /* スマホ：下の「電話する／LINEで相談」バーの上に */
-  .rental-pop { right: 12px; bottom: calc(80px + env(safe-area-inset-bottom)); width: 104px; height: 116px; }
-  .rental-pop__small { font-size: 8.5px; }
-  .rental-pop__big { font-size: 19px; }
+  .rental-pop { right: 12px; bottom: calc(80px + env(safe-area-inset-bottom)); width: 108px; height: 108px; }
+  .rental-pop__small { font-size: 8px; }
+  .rental-pop__big { font-size: 17px; }
 }
 @media (prefers-reduced-motion: no-preference) {
   .rental-pop__inner { animation: pop-spin 7s ease-in-out 2s infinite; }
