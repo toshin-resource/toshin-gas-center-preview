@@ -608,6 +608,8 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
   background: #fee350; color: #1f2a44; font-size: .9rem; font-weight: 700; letter-spacing: .06em;
 }
 .contact-box .rental-badge { color: #1f2a44; font-size: .82rem; margin-bottom: 10px; }
+/* 紺の相談帯（.cta）の中でも文字が薄くならないよう、紺の文字・太字で上書き */
+.cta .rental-badge { color: #1d2087; font-weight: 900; font-size: .95rem; margin-bottom: 18px; box-shadow: 0 2px 0 rgba(0, 0, 0, .15); }
 
 /* ---------- LINEで相談：相談内容を選ぶ画面 ---------- */
 .line-dialog { width: min(92vw, 440px); max-height: calc(100vh - 32px); padding: 0; border: 0; border-radius: 16px; box-shadow: 0 20px 60px rgba(20, 35, 55, .3); color: var(--c-text); }
