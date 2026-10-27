@@ -246,7 +246,7 @@
         return '<h2 class="line-dialog__title" id="line-dialog-title">お名前を<wbr>教えてください</h2>' +
           '<div class="line-form">' +
           '<label class="line-form__label" for="lf-name">お名前</label>' +
-          '<input class="line-form__input" id="lf-name" type="text" autocomplete="name" placeholder="例：真庭 太郎" value="' + esc(state.name || '') + '">' +
+          '<input class="line-form__input" id="lf-name" type="text" autocomplete="name" placeholder="例：瀬島 祐介" value="' + esc(state.name || '') + '">' +
           '<p class="line-form__error" role="alert" data-error></p>' +
           '<button type="button" class="btn btn--line line-dialog__next" data-next>内容を確認する</button></div>';
       },
