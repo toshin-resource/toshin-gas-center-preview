@@ -22,12 +22,17 @@
     { label: '乾太くんの<wbr>無料レンタルを<wbr>試したい', title: '無料レンタルを試したい', text: '乾太くんの無料レンタルを試してみたいです。詳しく教えてください。' },
     { label: '乾太くんの<wbr>購入を<wbr>検討している', title: '購入を検討しています', text: '乾太くんの購入を検討しています。お見積りをお願いします。' },
     { label: '乾太くんについて<wbr>もっと知りたい', title: '乾太くんについて知りたい', text: '乾太くんについて、もっと詳しく知りたいです。' },
-    { label: 'その他の<wbr>ご相談', title: 'その他のご相談', text: '（ご相談内容をご記入ください）' }
+    { label: 'その他の<wbr>ご相談', title: 'その他のご相談', text: '' }
   ];
   var LINE_AREAS = ['真庭市', '津山市', 'その他'];
-  var OPEN_FROM = 8 * 60 + 30;   // 営業時間 8:30〜18:30（電話の希望時間の選択肢）
-  var OPEN_TO = 18 * 60 + 30;
-  var CLOSED_DAY = 0;            // 定休日：日曜日（0=日）
+  // 「乾太くんについてもっと知りたい」を選んだときの、知りたいことの選択肢（いくつでも選べる）
+  var LINE_QUESTIONS = ['乾燥時間や仕上がり', 'ガス代・電気代', 'うちに設置できるか（場所・工事）', '機種の選び方・価格', 'お手入れの方法', '無料レンタルについて'];
+  var TOPIC_KNOW = 2;            // LINE_TOPICS の「もっと知りたい」の番号（0から数える）
+  var TOPIC_OTHER = 3;           // LINE_TOPICS の「その他のご相談」の番号
+  var OPEN_FROM = 9 * 60;        // お電話の希望時間として選べる範囲：9:00〜17:00
+  var OPEN_TO = 17 * 60;
+  var CLOSED_DAY = 0;            // 定休日：日曜日（0=日）。日付の一覧に出さない
+  var DATE_DAYS = 30;            // 日付の一覧に出す日数
   var WEEK = ['日', '月', '火', '水', '木', '金', '土'];
 
   var lineLinks = document.querySelectorAll('a[href^="' + LINE_ADD_URL + '"]');
@@ -48,12 +53,31 @@
     var hm = function (min) { return Math.floor(min / 60) + ':' + ('0' + (min % 60)).slice(-2); };
     var pad = function (n) { return ('0' + n).slice(-2); };
     var todayStr = function () { var d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+    // 今日を選んだときに選べる最も早い開始時刻（今から30分以上あと、30分刻み）
+    var firstFrom = function (dateStr) {
+      if (dateStr !== todayStr()) { return OPEN_FROM; }
+      var now = new Date();
+      var m = Math.ceil((now.getHours() * 60 + now.getMinutes() + 30) / 30) * 30;
+      return Math.max(OPEN_FROM, m);
+    };
+    // 日付の一覧（日曜日と、もう時間が残っていない今日は出さない）
+    var dateOptions = function (selected) {
+      var h = '<option value="">選択してください</option>';
+      var d = new Date();
+      for (var i = 0; i < DATE_DAYS; i++, d.setDate(d.getDate() + 1)) {
+        var v = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+        if (d.getDay() === CLOSED_DAY) { continue; }
+        if (i === 0 && firstFrom(v) > OPEN_TO - 60) { continue; }
+        h += '<option value="' + v + '"' + (selected === v ? ' selected' : '') + '>' + dateLabel(v) + (i === 0 ? '・今日' : '') + '</option>';
+      }
+      return h;
+    };
     var dateLabel = function (v) {
       var p = v.split('-'); var d = new Date(+p[0], +p[1] - 1, +p[2]);
       return (d.getMonth() + 1) + '月' + d.getDate() + '日（' + WEEK[d.getDay()] + '）';
     };
     var steps = function () {
-      var s = ['topic', 'area', 'method'];
+      var s = ['topic', 'detail', 'area', 'method'];
       if (state.method === '電話') { s.push('call'); }
       s.push('name', 'confirm');
       return s;
@@ -61,20 +85,74 @@
     var message = function () {
       var t = LINE_TOPICS[state.topic];
       var area = state.area === 'その他' ? 'その他' + (state.areaOther ? '（' + state.areaOther + '）' : '') : state.area;
-      var lines = ['【' + t.title + '】', t.text, '',
+      var lines = ['【' + t.title + '】'];
+      if (t.text) { lines.push(t.text); }
+      if (state.topic === TOPIC_KNOW) {
+        if (state.questions && state.questions.length) { lines.push('■知りたいこと：' + state.questions.join('、')); }
+        if (state.detail) { lines.push('■ご質問：' + state.detail); }
+      } else if (state.topic === TOPIC_OTHER) {
+        lines.push('■ご相談内容：' + state.detail);
+      } else if (state.detail) {
+        lines.push('■ご質問・ご要望：' + state.detail);
+      }
+      lines.push('',
         '■お名前：' + state.name,
         '■お住まいの地域：' + area,
-        '■ご希望の連絡方法：' + state.method];
+        '■ご希望の連絡方法：' + state.method);
       if (state.method === '電話') {
         lines.push('■お電話の希望日時：' + dateLabel(state.date) + ' ' + hm(state.from) + '〜' + hm(state.to));
         lines.push('■電話番号：' + state.tel);
       }
       return lines.join('\n') + LINE_SIGN;
     };
+    var lineUrl = function () { return 'https://line.me/R/oaMessage/' + LINE_ID + '/?' + encodeURIComponent(message()); };
+    // スマホ（指で操作する端末）か、PC（マウスで操作する端末）か
+    var isTouch = function () { return !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches); };
     var openLine = function () {
-      var url = 'https://line.me/R/oaMessage/' + LINE_ID + '/?' + encodeURIComponent(message());
-      var touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-      if (touch) { window.location.href = url; } else { window.open(url, '_blank', 'noopener'); }
+      if (isTouch()) { window.location.href = lineUrl(); } else { window.open(lineUrl(), '_blank', 'noopener'); }
+    };
+    // PC では、メッセージ入りの LINE のリンクを QR コードにして表示し、スマホで読み取ってもらう
+    // （QR コードは js/vendor/qrcode.js を必要なときだけ読み込んで作る）
+    var loadQrLib = function (done) {
+      if (window.qrcode) { done(true); return; }
+      var sc = document.createElement('script');
+      sc.src = 'js/vendor/qrcode.js';
+      sc.onload = function () { done(!!window.qrcode); };
+      sc.onerror = function () { done(false); };
+      document.head.appendChild(sc);
+    };
+    var drawQr = function () {
+      var box = dlg.querySelector('[data-qr]');
+      if (!box) { return; }
+      loadQrLib(function (ok) {
+        if (!ok || !dlg.contains(box)) {
+          box.innerHTML = '<p class="line-qr__error">QRコードを表示できませんでした。<wbr>下のボタンから<wbr>LINEを開いてください。</p>';
+          return;
+        }
+        // QR には日本語を %変換せずそのまま（UTF-8）入れて、データ量を約3分の1にする。
+        // 読み取ったスマホ側で正しい形に直して LINE が開く。改行・記号などの半角文字だけ %変換する
+        var text = message(), q = '';
+        for (var i = 0; i < text.length; i++) {
+          var ch = text.charAt(i);
+          q += ch.charCodeAt(0) > 127 ? ch : encodeURIComponent(ch);
+        }
+        window.qrcode.stringToBytes = window.qrcode.stringToBytesFuncs['UTF-8'];
+        var qr = window.qrcode(0, 'L'); // 誤り訂正は最低（L）にして、マスをできるだけ大きくする
+        qr.addData('https://line.me/R/oaMessage/' + LINE_ID + '/?' + q, 'Byte');
+        qr.make();
+        // 1マスを画面のピクセルの整数倍（3px以上）で描くと、くっきりしてスマホで読み取りやすい
+        var modules = qr.getModuleCount() + 8;          // 周りの白い余白（4マスずつ）を含めたマス数
+        var dpr = window.devicePixelRatio || 1;
+        var room = box.clientWidth || 320;
+        var cell = Math.max(3, Math.floor(room * dpr / modules)) / dpr;
+        box.innerHTML = qr.createSvgTag({ cellSize: 1, margin: 4, scalable: true }); // cellSize 1 なので margin 4 = 4マス
+        var svg = box.querySelector('svg');
+        if (svg) {
+          svg.setAttribute('role', 'img');
+          svg.setAttribute('aria-label', 'LINEで相談するためのQRコード');
+          svg.style.width = svg.style.height = (cell * modules) + 'px';
+        }
+      });
     };
     var choiceList = function (items, current) {
       var h = '<ul class="line-dialog__list">';
@@ -99,6 +177,41 @@
           '<p class="line-dialog__lead">いくつかの質問に答えると、<wbr>LINEに送るメッセージが<wbr>できあがります。</p>' +
           choiceList(LINE_TOPICS.map(function (t) { return t.label; }), state.topic);
       },
+      detail: function () {
+        // 無料レンタル・購入検討：ご質問・ご要望の自由記入（任意。空のまま次へ進める）
+        if (state.topic !== TOPIC_KNOW && state.topic !== TOPIC_OTHER) {
+          return '<h2 class="line-dialog__title" id="line-dialog-title">ご質問・ご要望が<wbr>あれば<wbr>ご記入ください</h2>' +
+            '<p class="line-dialog__lead">なければ、<wbr>そのまま<wbr>「次へ」で<wbr>大丈夫です。</p>' +
+            '<div class="line-form">' +
+            '<label class="line-form__label" for="lf-detail">ご質問・ご要望<span class="line-form__opt">（自由記入・任意）</span></label>' +
+            '<textarea class="line-form__input line-form__textarea" id="lf-detail" rows="4" placeholder="' +
+            (state.topic === 0 ? '例：レンタルの期間を知りたいです' : '例：9kgと6kgで迷っています') + '">' + esc(state.detail || '') + '</textarea>' +
+            '<p class="line-form__error" role="alert" data-error></p>' +
+            '<button type="button" class="btn btn--line line-dialog__next" data-next>次へ</button></div>';
+        }
+        var text = '<label class="line-form__label" for="lf-detail">' +
+          (state.topic === TOPIC_KNOW ? 'ご質問・ご要望<span class="line-form__opt">（自由記入・任意）</span>' : 'ご相談内容') + '</label>' +
+          '<textarea class="line-form__input line-form__textarea" id="lf-detail" rows="4" placeholder="' +
+          (state.topic === TOPIC_KNOW ? '例：洗面所に置けるか知りたいです' : 'ご自由にご記入ください') + '">' + esc(state.detail || '') + '</textarea>';
+        if (state.topic === TOPIC_KNOW) {
+          var checks = '<div class="line-checks" role="group" aria-label="知りたいこと">';
+          for (var q = 0; q < LINE_QUESTIONS.length; q++) {
+            var on = state.questions && state.questions.indexOf(LINE_QUESTIONS[q]) !== -1;
+            checks += '<label class="line-check"><input type="checkbox" class="line-check__input" value="' + q + '"' + (on ? ' checked' : '') + '>' +
+                      '<span>' + LINE_QUESTIONS[q] + '</span></label>';
+          }
+          checks += '</div>';
+          return '<h2 class="line-dialog__title" id="line-dialog-title">知りたいことを<wbr>教えてください</h2>' +
+            '<p class="line-dialog__lead">当てはまるものを<wbr>選んでください<wbr>（いくつでも）。<wbr>自由に書いていただいても<wbr>大丈夫です。</p>' +
+            '<div class="line-form">' + checks + text +
+            '<p class="line-form__error" role="alert" data-error></p>' +
+            '<button type="button" class="btn btn--line line-dialog__next" data-next>次へ</button></div>';
+        }
+        return '<h2 class="line-dialog__title" id="line-dialog-title">ご相談内容を<wbr>ご記入ください</h2>' +
+          '<div class="line-form">' + text +
+          '<p class="line-form__error" role="alert" data-error></p>' +
+          '<button type="button" class="btn btn--line line-dialog__next" data-next>次へ</button></div>';
+      },
       area: function () {
         var other = state.area === 'その他';
         return '<h2 class="line-dialog__title" id="line-dialog-title">お住まいの地域を<wbr>選んでください</h2>' +
@@ -110,19 +223,20 @@
       },
       method: function () {
         return '<h2 class="line-dialog__title" id="line-dialog-title">ご連絡方法を<wbr>選んでください</h2>' +
-          choiceList(['LINEで<wbr>連絡してほしい', '電話で<wbr>連絡してほしい'], state.method === 'LINE' ? 0 : (state.method === '電話' ? 1 : -1));
+          choiceList(['LINEで<wbr>連絡してほしい<span class="line-dialog__sub">※返信に<wbr>少しお時間を<wbr>いただく<wbr>場合があります</span>', '電話で<wbr>連絡してほしい'],
+            state.method === 'LINE' ? 0 : (state.method === '電話' ? 1 : -1));
       },
       call: function () {
         return '<h2 class="line-dialog__title" id="line-dialog-title">お電話の<wbr>ご希望を<wbr>教えてください</h2>' +
-          '<p class="line-dialog__lead">営業時間は8:30〜18:30、<wbr>日曜日は<wbr>定休日です。</p>' +
+          '<p class="line-dialog__lead">お電話は<wbr>9:00〜17:00の間で<wbr>お選びください。<wbr>日曜日は<wbr>定休日です。</p>' +
           '<div class="line-form">' +
           '<label class="line-form__label" for="lf-date">ご希望の日</label>' +
-          '<input class="line-form__input" id="lf-date" type="date" min="' + todayStr() + '" value="' + esc(state.date || '') + '">' +
+          '<select class="line-form__input" id="lf-date">' + dateOptions(state.date) + '</select>' +
           '<span class="line-form__label" id="lf-time-label">ご希望の時間帯<span class="line-form__opt">（1時間以上）</span></span>' +
           '<div class="line-form__time" role="group" aria-labelledby="lf-time-label">' +
-          '<select class="line-form__input" id="lf-from" aria-label="何時から">' + timeOptions(OPEN_FROM, OPEN_TO - 60, state.from) + '</select>' +
+          '<select class="line-form__input" id="lf-from" aria-label="何時から">' + timeOptions(firstFrom(state.date || ''), OPEN_TO - 60, state.from) + '</select>' +
           '<span aria-hidden="true">〜</span>' +
-          '<select class="line-form__input" id="lf-to" aria-label="何時まで">' + timeOptions(OPEN_FROM + 60, OPEN_TO, state.to) + '</select></div>' +
+          '<select class="line-form__input" id="lf-to" aria-label="何時まで">' + timeOptions((state.from || firstFrom(state.date || '')) + 60, OPEN_TO, state.to) + '</select></div>' +
           '<label class="line-form__label" for="lf-tel">電話番号</label>' +
           '<input class="line-form__input" id="lf-tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="例：090-1234-5678" value="' + esc(state.tel || '') + '">' +
           '<p class="line-form__error" role="alert" data-error></p>' +
@@ -137,9 +251,22 @@
           '<button type="button" class="btn btn--line line-dialog__next" data-next>内容を確認する</button></div>';
       },
       confirm: function () {
+        var notice = state.method === 'LINE' ? '<p class="line-dialog__notice">※⁠LINEでの<wbr>ご返信は、<wbr>少しお時間を<wbr>いただく場合が<wbr>あります。<wbr>あらかじめ<wbr>ご了承ください。</p>' : '';
+        if (!isTouch()) {
+          // PC：左にメッセージ、右に QR コード
+          return '<h2 class="line-dialog__title" id="line-dialog-title">スマホで<wbr>QRコードを<wbr>読み取ってください</h2>' +
+            '<p class="line-dialog__lead">スマホのカメラ（または<wbr>LINEの<wbr>QRコードリーダー）で<wbr>読み取ると、<wbr>下の内容が<wbr>入力された状態で<wbr>LINEが開きます。<wbr>そのまま<wbr>送信してください。</p>' +
+            '<div class="line-confirm">' +
+            '<div class="line-confirm__text"><div class="line-dialog__preview">' + esc(message()).replace(/\n/g, '<br>') + '</div>' + notice + '</div>' +
+            '<div class="line-qr"><div class="line-qr__code" data-qr><p class="line-qr__loading">QRコードを作成中…</p></div>' +
+            '<p class="line-qr__caption">読み取りにくいときは、<wbr>スマホを<wbr>少し近づけたり<wbr>離したりしてください。</p></div>' +
+            '</div>' +
+            '<button type="button" class="line-dialog__pc-open" data-send>このパソコンの<wbr>LINEで開く ›</button>';
+        }
         return '<h2 class="line-dialog__title" id="line-dialog-title">この内容で<wbr>LINEを開きます</h2>' +
           '<p class="line-dialog__lead">LINEが開いたら、<wbr>送信ボタンを<wbr>押してください。</p>' +
           '<div class="line-dialog__preview">' + esc(message()).replace(/\n/g, '<br>') + '</div>' +
+          (state.method === 'LINE' ? '<p class="line-dialog__notice">※⁠LINEでの<wbr>ご返信は、<wbr>少しお時間を<wbr>いただく場合が<wbr>あります。<wbr>あらかじめ<wbr>ご了承ください。</p>' : '') +
           '<button type="button" class="btn btn--line line-dialog__send" data-send>' +
           '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 3C6.48 3 2 6.58 2 11c0 2.47 1.4 4.68 3.6 6.15L5 21l4.06-2.25c.94.17 1.92.25 2.94.25 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/></svg>' +
           'LINEを開いて<wbr>送る</button>';
@@ -158,10 +285,13 @@
         (key === 'topic' ? '<p class="line-dialog__note"><a href="' + LINE_ADD_URL + '" target="_blank" rel="noopener">友だち追加だけする</a></p>' : '') +
         '<p class="line-dialog__privacy">入力内容はこのサイトには保存されず、<wbr>LINEのメッセージとしてだけ<wbr>送られます。</p>' +
         '</div>';
+      // PC の確認画面は横に広げて QR コードを表示
+      dlg.classList.toggle('is-wide', key === 'confirm' && !isTouch());
+      if (key === 'confirm' && !isTouch()) { drawQr(); }
       focusFirst();
     };
     var focusFirst = function () {
-      var first = dlg.querySelector('.line-form:not([hidden]) .line-form__input, .line-dialog__choice.is-selected, .line-dialog__choice, [data-send]');
+      var first = dlg.querySelector('.line-form:not([hidden]) .line-check__input, .line-form:not([hidden]) .line-form__input, .line-dialog__choice.is-selected, .line-dialog__choice, [data-send]');
       if (first) { first.focus(); }
     };
     var go = function (delta) { stepIndex = Math.max(0, Math.min(steps().length - 1, stepIndex + delta)); render(); };
@@ -174,10 +304,8 @@
       var tel = dlg.querySelector('#lf-tel').value.trim();
       state.date = date; state.from = from === '' ? null : +from; state.to = to === '' ? null : +to; state.tel = tel;
       if (!date) { return 'ご希望の日を選んでください。'; }
-      if (date < todayStr()) { return '今日以降の日を選んでください。'; }
-      var p = date.split('-');
-      if (new Date(+p[0], +p[1] - 1, +p[2]).getDay() === CLOSED_DAY) { return '日曜日は定休日です。別の日を選んでください。'; }
       if (state.from === null || state.to === null) { return 'ご希望の時間帯を選んでください。'; }
+      if (state.from < firstFrom(date)) { return 'その時間は過ぎています。別の時間を選んでください。'; }
       if (state.to - state.from < 60) { return '時間帯は1時間以上の幅で選んでください。'; }
       var digits = tel.replace(/[^0-9]/g, '');
       if (!/^0\d{9,10}$/.test(digits)) { return '電話番号を正しく入力してください。'; }
@@ -193,7 +321,10 @@
       var choice = t.closest('.line-dialog__choice');
       if (choice) {
         var v = +choice.getAttribute('data-value');
-        if (key === 'topic') { state.topic = v; go(1); }
+        if (key === 'topic') {
+          if (state.topic !== v) { state.detail = ''; state.questions = []; }
+          state.topic = v; go(1);
+        }
         else if (key === 'area') {
           state.area = LINE_AREAS[v];
           if (state.area === 'その他') { render(); } else { state.areaOther = ''; go(1); }
@@ -201,7 +332,16 @@
         return;
       }
       if (t.closest('[data-next]')) {
-        if (key === 'area') { state.areaOther = dlg.querySelector('#lf-area').value.trim(); go(1); }
+        if (key === 'detail') {
+          state.detail = dlg.querySelector('#lf-detail').value.trim();
+          state.questions = [];
+          var boxes = dlg.querySelectorAll('.line-check__input:checked');
+          for (var b = 0; b < boxes.length; b++) { state.questions.push(LINE_QUESTIONS[+boxes[b].value]); }
+          if (state.topic === TOPIC_KNOW && !state.questions.length && !state.detail) { showError('知りたいことを選ぶか、ご質問をご記入ください。'); }
+          else if (state.topic === TOPIC_OTHER && !state.detail) { showError('ご相談内容をご記入ください。'); }
+          else { go(1); }
+        }
+        else if (key === 'area') { state.areaOther = dlg.querySelector('#lf-area').value.trim(); go(1); }
         else if (key === 'call') { var err = validateCall(); if (err) { showError(err); } else { go(1); } }
         else if (key === 'name') {
           state.name = dlg.querySelector('#lf-name').value.trim();
@@ -209,14 +349,22 @@
         }
       }
     });
+    // 日付を選んだら開始時刻の候補を（今日なら過ぎた時間を除いて）作り直し、
     // 開始時刻を選んだら、終了時刻は1時間以上あとだけ選べるようにする
     dlg.addEventListener('change', function (e) {
-      if (e.target.id === 'lf-from') {
-        var from = e.target.value === '' ? OPEN_FROM : +e.target.value;
-        var to = dlg.querySelector('#lf-to');
-        var keep = to.value === '' ? null : +to.value;
+      var fromSel = dlg.querySelector('#lf-from');
+      var toSel = dlg.querySelector('#lf-to');
+      if (!fromSel || !toSel) { return; }
+      if (e.target.id === 'lf-date') {
+        var first = firstFrom(e.target.value);
+        var keepFrom = fromSel.value === '' || +fromSel.value < first ? null : +fromSel.value;
+        fromSel.innerHTML = timeOptions(first, OPEN_TO - 60, keepFrom);
+      }
+      if (e.target.id === 'lf-date' || e.target.id === 'lf-from') {
+        var from = fromSel.value === '' ? firstFrom(dlg.querySelector('#lf-date').value) : +fromSel.value;
+        var keep = toSel.value === '' ? null : +toSel.value;
         if (keep !== null && keep - from < 60) { keep = null; }
-        to.innerHTML = timeOptions(from + 60, OPEN_TO, keep);
+        toSel.innerHTML = timeOptions(from + 60, OPEN_TO, keep);
       }
     });
     // 入力し直したら、エラーの文を消す
@@ -272,6 +420,41 @@
       if (index > 0) { el.style.transitionDelay = Math.min(index, 3) * 90 + 'ms'; }
       el.classList.add('reveal');
       observer.observe(el);
+    }
+  }
+
+  // 横にスクロールできる表：はみ出しているときだけ案内と右端の目印を出す。
+  // 表が最初に画面に入ったとき、一度だけ少し横に動かして「動かせる」ことを見せる
+  var scrollers = document.querySelectorAll('.table-scroll');
+  if (scrollers.length) {
+    document.documentElement.classList.add('js-tables');
+    var updateScroller = function (box) {
+      var wrap = box.querySelector('.table-wrap');
+      var more = wrap.scrollWidth > wrap.clientWidth + 4;
+      box.classList.toggle('has-more', more);
+      box.classList.toggle('is-end', wrap.scrollLeft + wrap.clientWidth >= wrap.scrollWidth - 4);
+      var hint = box.previousElementSibling;
+      if (hint && hint.classList.contains('table-hint')) { hint.classList.toggle('is-needed', more); }
+    };
+    Array.prototype.forEach.call(scrollers, function (box) {
+      box.querySelector('.table-wrap').addEventListener('scroll', function () { updateScroller(box); }, { passive: true });
+      updateScroller(box);
+    });
+    window.addEventListener('resize', function () { Array.prototype.forEach.call(scrollers, updateScroller); });
+    if (!reduceMotion && 'IntersectionObserver' in window) {
+      var nudge = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) { return; }
+          nudge.unobserve(entry.target);
+          var wrap = entry.target.querySelector('.table-wrap');
+          if (!entry.target.classList.contains('has-more') || wrap.scrollLeft > 0) { return; }
+          setTimeout(function () {
+            wrap.scrollTo({ left: 80, behavior: 'smooth' });
+            setTimeout(function () { wrap.scrollTo({ left: 0, behavior: 'smooth' }); }, 750);
+          }, 500);
+        });
+      }, { threshold: 0.4 });
+      Array.prototype.forEach.call(scrollers, function (box) { nudge.observe(box); });
     }
   }
 

@@ -12,6 +12,7 @@
   --c-accent: #1f3b5a;        /* アクセント（深いネイビー） */
   --c-accent-dark: #142a42;
   --c-accent-soft: #e9eef4;
+  --c-logo-navy: #1d2087;    /* トーシンガスのロゴの紺 */
   --c-line-green: #00873c;    /* LINEボタン */
   --c-line-green-dark: #006b30;
   --c-footer: #18222f;
@@ -357,8 +358,34 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
 /* ---------- tables ---------- */
 .table-wrap { position: relative; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--c-line); border-radius: 8px; background: #fff; }
 .table-wrap:focus-visible { outline-offset: 4px; }
-.table-hint { display: none; font-size: .75rem; color: var(--c-muted); margin: 0 0 6px; }
-@media (max-width: 820px) { .table-hint { display: block; } }
+/* 横スクロールできる表の案内（ロゴの青。矢印が左右に動く） */
+.table-hint {
+  display: none; align-items: center; gap: 8px; width: fit-content; margin: 0 0 10px; padding: 6px 16px 6px 10px;
+  border: 1.5px solid #87aad9; border-radius: 999px; background: #e9f1fb; color: var(--c-logo-navy);
+  font-size: .85rem; font-weight: 700; letter-spacing: .04em;
+}
+@media (max-width: 820px) { .table-hint { display: inline-flex; } }
+.js-tables .table-hint { display: none; }
+.js-tables .table-hint.is-needed { display: inline-flex; }
+.table-hint__icon { flex: none; width: 22px; height: 22px; color: #3171b8; }
+/* 表の右端：続きがあるときだけ、白いぼかしと「›」を表示（いちばん右までスクロールすると消える） */
+.table-scroll { position: relative; }
+.table-scroll::after, .table-scroll::before { pointer-events: none; opacity: 0; transition: opacity .3s; }
+.table-scroll::after {
+  content: ""; position: absolute; z-index: 3; top: 1px; right: 1px; bottom: 1px; width: 56px; border-radius: 0 8px 8px 0;
+  background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,.95) 75%);
+}
+.table-scroll::before {
+  content: "›"; position: absolute; z-index: 4; right: 8px; top: 64px; width: 36px; height: 36px; border-radius: 50%;
+  background: #3171b8; color: #fff; font: 700 1.7rem/32px var(--font); text-align: center; box-shadow: 0 4px 12px rgba(29, 32, 135, .3);
+}
+.table-scroll.has-more:not(.is-end)::after, .table-scroll.has-more:not(.is-end)::before { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  .table-hint__icon { animation: hint-swipe 1.6s ease-in-out infinite; }
+  .table-scroll.has-more:not(.is-end)::before { animation: hint-bounce 1.3s ease-in-out infinite; }
+}
+@keyframes hint-swipe { 0%, 100% { transform: translateX(-4px); } 50% { transform: translateX(4px); } }
+@keyframes hint-bounce { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
 .spec-table { width: 100%; min-width: 760px; font-size: .85rem; line-height: 1.55; }
 .spec-table th, .spec-table td { border-bottom: 1px solid var(--c-line); border-right: 1px solid var(--c-line); padding: 10px 10px; text-align: center; vertical-align: middle; }
 .spec-table th:last-child, .spec-table td:last-child { border-right: 0; }
@@ -534,37 +561,47 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
 @keyframes fade-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 
 /* ---------- お試し無料レンタル中のポップ ---------- */
+/* 全ページの右下に固定。乾太くん（乾燥機）の絵で、ふちはトーシンガスのロゴの6色。
+   ドアの窓の中に文字を入れ、ときどきドラムのように回して「乾燥中」に見せる */
 .rental-pop {
-  position: absolute; z-index: 5; left: 3%; top: 7%;
-  width: 136px; height: 136px; border-radius: 50%;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
-  background: #d9481f; color: #fff; text-decoration: none; text-align: center; line-height: 1.15;
-  box-shadow: 0 8px 20px rgba(120, 30, 0, .3), inset 0 0 0 5px #d9481f, inset 0 0 0 7px rgba(255,255,255,.85);
-  transform: rotate(-8deg);
+  position: fixed; z-index: 80; right: 20px; bottom: 24px;
+  width: 124px; height: 139px; display: block; text-decoration: none; color: #fff;
+  filter: drop-shadow(0 6px 12px rgba(29, 32, 135, .28));
 }
-.rental-pop:hover, .rental-pop:focus-visible { color: #fff; background: #c23d17; }
-.rental-pop__small { font-size: .85rem; font-weight: 700; letter-spacing: .05em; }
-.rental-pop__big { font-size: 2.3rem; font-weight: 900; letter-spacing: .06em; color: #fee350; text-shadow: 0 2px 0 rgba(120, 30, 0, .35); }
-@media (max-width: 1100px) {
-  .rental-pop { left: auto; right: 14px; top: 14px; width: 112px; height: 112px; }
-  .rental-pop__small { font-size: .74rem; }
-  .rental-pop__big { font-size: 1.9rem; }
+.rental-pop__dryer { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.rental-pop__inner {
+  position: absolute; left: 15%; width: 70%; top: 27.68%; aspect-ratio: 1 / 1; border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  text-align: center; white-space: nowrap; word-break: keep-all;
 }
-@media (max-width: 600px) {
-  .rental-pop { width: 96px; height: 96px; right: 10px; top: 10px; }
-  .rental-pop__small { font-size: .66rem; }
-  .rental-pop__big { font-size: 1.6rem; }
+.rental-pop__small { display: block; font-size: 10px; font-weight: 700; line-height: 1.15; letter-spacing: 0; color: #fff; }
+.rental-pop__big { display: block; font-size: 23px; font-weight: 900; line-height: 1.05; letter-spacing: .02em; color: #fee350; }
+.rental-pop:hover, .rental-pop:focus-visible { color: #fff; filter: drop-shadow(0 8px 16px rgba(29, 32, 135, .4)); }
+@media (max-width: 900px) {
+  /* スマホ：下の「電話する／LINEで相談」バーの上に */
+  .rental-pop { right: 12px; bottom: calc(80px + env(safe-area-inset-bottom)); width: 104px; height: 116px; }
+  .rental-pop__small { font-size: 8.5px; }
+  .rental-pop__big { font-size: 19px; }
 }
 @media (prefers-reduced-motion: no-preference) {
-  .rental-pop { animation: pop-wobble 4s ease-in-out 1.5s infinite; }
-  .intro-on:not(.intro-leaving) .rental-pop { animation-play-state: paused; }
+  .rental-pop__inner { animation: pop-spin 7s ease-in-out 2s infinite; }
+  .rental-pop__dryer { animation: pop-shake 7s linear 2s infinite; }
+  .rental-pop__led { animation: pop-led 7s linear 2s infinite; }
+  .intro-on:not(.intro-leaving) .rental-pop__inner,
+  .intro-on:not(.intro-leaving) .rental-pop__dryer,
+  .intro-on:not(.intro-leaving) .rental-pop__led { animation-play-state: paused; }
 }
-@keyframes pop-wobble {
-  0%, 78%, 100% { transform: rotate(-8deg) scale(1); }
-  83% { transform: rotate(-15deg) scale(1.07); }
-  88% { transform: rotate(-3deg) scale(1.04); }
-  93% { transform: rotate(-10deg) scale(1); }
+/* 7秒ごと：しばらく止まって読める → 2回転（乾燥中）→ 止まる */
+@keyframes pop-spin {
+  0%, 60% { transform: rotate(0deg); }
+  92%, 100% { transform: rotate(720deg); }
 }
+@keyframes pop-shake {
+  0%, 60%, 92%, 100% { transform: none; }
+  64%, 72%, 80%, 88% { transform: translate(.6px, 0); }
+  68%, 76%, 84% { transform: translate(-.6px, 0); }
+}
+@keyframes pop-led { 0%, 59% { fill: #4cd07d; } 60%, 91% { fill: #ff9f43; } 92%, 100% { fill: #4cd07d; } }
 .rental-badge {
   display: inline-block; margin: 0 0 14px; padding: 4px 16px; border-radius: 999px;
   background: #fee350; color: #1f2a44; font-size: .9rem; font-weight: 700; letter-spacing: .06em;
@@ -599,9 +636,22 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
 .line-dialog__privacy { margin: 14px 0 0; font-size: .72rem; color: var(--c-muted); line-height: 1.6; text-align: center; }
 .line-dialog__preview {
   margin: 0 0 16px; padding: 14px 16px; border-radius: 12px; background: #f4f5f7; border: 1px solid var(--c-line);
-  font-size: .88rem; line-height: 1.75; word-break: normal; overflow-wrap: anywhere; max-height: 40vh; overflow-y: auto;
+  font-size: .88rem; line-height: 1.75; word-break: normal; word-break: auto-phrase; overflow-wrap: anywhere; max-height: 40vh; overflow-y: auto;
 }
 .line-dialog__send, .line-dialog__next { width: 100%; margin-top: 4px; }
+/* PC の確認画面：左にメッセージ、右に大きな QR コード */
+.line-dialog.is-wide { width: min(96vw, 920px); }
+.line-confirm { display: grid; grid-template-columns: minmax(260px, 1fr) auto; gap: 20px; align-items: start; }
+.line-confirm .line-dialog__preview { max-height: 360px; }
+.line-qr { padding: 12px; border: 2px solid var(--c-line-green); border-radius: 14px; background: #fff; text-align: center; }
+.line-qr__code { min-width: 300px; min-height: 300px; display: grid; place-items: center; }
+.line-qr__code svg { display: block; max-width: none; shape-rendering: crispEdges; }
+.line-qr__loading, .line-qr__error { margin: 0; font-size: .85rem; color: var(--c-muted); }
+.line-qr__caption { margin: 8px 0 0; font-size: .75rem; color: var(--c-muted); line-height: 1.6; }
+.line-dialog__pc-open { display: block; margin: 14px auto 0; padding: 8px 12px; border: 0; background: none; color: var(--c-line-green); font: 700 .9rem var(--font); text-decoration: underline; text-underline-offset: .2em; cursor: pointer; }
+@media (max-width: 960px) { .line-confirm { grid-template-columns: minmax(0, 1fr); } .line-qr { width: fit-content; margin: 0 auto; } }
+.line-dialog__sub { display: block; margin-top: 2px; font-size: .78rem; font-weight: 400; color: var(--c-muted); }
+.line-dialog__notice { margin: -4px 0 14px; padding: 10px 12px; border-radius: 10px; background: #fff8e1; color: #6b4e00; font-size: .85rem; line-height: 1.6; }
 .line-form { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
 .line-form[hidden] { display: none; }
 .line-form__label { margin-top: 8px; font-size: .9rem; font-weight: 700; }
@@ -611,6 +661,18 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
   font: 16px/1.4 var(--font); color: var(--c-text); /* iPhone で拡大されないよう16px */
 }
 .line-form__input:focus { outline: 3px solid #b86200; outline-offset: 1px; border-color: transparent; }
+/* iPhone でも入力欄が枠からはみ出さないように */
+.line-form > *, .line-form__time > * { min-width: 0; max-width: 100%; }
+.line-dialog__body { overflow-x: hidden; }
+.line-form__textarea { min-height: 110px; resize: vertical; line-height: 1.6; }
+.line-checks { display: grid; gap: 8px; margin-bottom: 4px; }
+.line-check {
+  display: flex; align-items: center; gap: 12px; min-height: 50px; padding: 10px 14px;
+  border: 2px solid var(--c-line); border-radius: 12px; background: #fff; cursor: pointer;
+  font-size: .95rem; font-weight: 700; line-height: 1.45;
+}
+.line-check:has(input:checked) { border-color: var(--c-line-green); background: #f0f8f3; }
+.line-check__input { flex: none; width: 22px; height: 22px; margin: 0; accent-color: var(--c-line-green); }
 .line-form__time { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; }
 .line-form__error { min-height: 1.4em; margin: 6px 0 4px; color: #b3261e; font-size: .85rem; font-weight: 700; }
 .line-dialog__note { margin: 16px 0 0; text-align: center; font-size: .85rem; }
