@@ -282,6 +282,23 @@
       }
     };
 
+    // 「お試し無料レンタル中」のポップを押したときの最初の確認画面
+    var renderRentalAsk = function () {
+      dlg.classList.remove('is-wide');
+      dlg.innerHTML = '<div class="line-dialog__body">' +
+        '<button type="button" class="line-dialog__close" aria-label="閉じる">×</button>' +
+        '<p class="line-dialog__eyebrow">お試し無料レンタル</p>' +
+        '<h2 class="line-dialog__title" id="line-dialog-title">乾太くんの<wbr>お試し<wbr>無料レンタルを<wbr>ご希望ですか？</h2>' +
+        '<p class="line-dialog__lead">いくつかの質問に<wbr>お答えいただくと、<wbr>LINEで<wbr>ご相談いただけます。</p>' +
+        '<div class="line-dialog__ask">' +
+        '<button type="button" class="btn btn--line line-dialog__yes" data-rental-yes>はい、<wbr>無料レンタルを<wbr>希望します</button>' +
+        '<button type="button" class="line-dialog__other" data-rental-other>ほかのご相談をする ›</button>' +
+        '</div>' +
+        '<p class="line-dialog__privacy">入力内容はこのサイトには保存されず、<wbr>LINEのメッセージとしてだけ<wbr>送られます。</p>' +
+        '</div>';
+      var yes = dlg.querySelector('[data-rental-yes]');
+      if (yes) { yes.focus(); }
+    };
     var render = function () {
       var list = steps();
       var key = list[stepIndex];
@@ -300,7 +317,7 @@
       focusFirst();
     };
     var focusFirst = function () {
-      var first = dlg.querySelector('.line-form:not([hidden]) .line-check__input, .line-form:not([hidden]) .line-form__input, .line-dialog__choice.is-selected, .line-dialog__choice, [data-send]');
+      var first = dlg.querySelector('[data-rental-yes], .line-form:not([hidden]) .line-check__input, .line-form:not([hidden]) .line-form__input, .line-dialog__choice.is-selected, .line-dialog__choice, [data-send]');
       if (first) { first.focus(); }
     };
     var go = function (delta) { stepIndex = Math.max(0, Math.min(steps().length - 1, stepIndex + delta)); render(); };
@@ -324,6 +341,9 @@
     dlg.addEventListener('click', function (e) {
       var t = e.target;
       if (t === dlg || t.closest('.line-dialog__close')) { dlg.close(); return; }
+      // ポップから開いたときの確認：「はい」→ 無料レンタルとして地域の質問へ／「ほかのご相談」→ 相談内容を選ぶ画面へ
+      if (t.closest('[data-rental-yes]')) { state.topic = 0; stepIndex = 1; render(); return; }
+      if (t.closest('[data-rental-other]')) { stepIndex = 0; render(); return; }
       if (t.closest('[data-back]')) { go(-1); return; }
       if (t.closest('[data-send]')) { openLine(); dlg.close(); return; }
       var key = steps()[stepIndex];
@@ -392,10 +412,8 @@
         e.preventDefault();
         state = {};
         stepIndex = 0;
-        // 「お試し無料レンタル中」のポップから開いたときは、相談内容を「無料レンタル」にして地域の質問から始める
-        var topic = this.getAttribute('data-line-topic');
-        if (topic !== null) { state.topic = +topic; stepIndex = 1; }
-        render();
+        // 「お試し無料レンタル中」のポップから開いたときは、まず「無料レンタルをご希望ですか？」と確認する
+        if (this.getAttribute('data-line-topic') !== null) { renderRentalAsk(); } else { render(); }
         dlg.showModal();
         focusFirst();
       });

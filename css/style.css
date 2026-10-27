@@ -651,6 +651,11 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
   font-size: .88rem; line-height: 1.75; word-break: normal; word-break: auto-phrase; overflow-wrap: anywhere; max-height: 40vh; overflow-y: auto;
 }
 .line-dialog__send, .line-dialog__next { width: 100%; margin-top: 4px; }
+/* ポップから開いたときの「無料レンタルをご希望ですか？」 */
+.line-dialog__ask { display: grid; gap: 10px; margin-top: 18px; }
+.line-dialog__yes { width: 100%; min-height: 56px; font-size: 1.05rem; }
+.line-dialog__other { padding: 12px; border: 2px solid var(--c-line); border-radius: 999px; background: #fff; color: var(--c-text); font: 700 .95rem var(--font); cursor: pointer; }
+.line-dialog__other:hover { border-color: var(--c-accent); color: var(--c-accent); }
 /* PC の確認画面：左にメッセージ、右に大きな QR コード */
 .line-dialog.is-wide { width: min(96vw, 920px); }
 .line-confirm { display: grid; grid-template-columns: minmax(260px, 1fr) auto; gap: 20px; align-items: start; }
