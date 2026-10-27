@@ -39,7 +39,9 @@
   var TOPIC_OTHER = 4;           // LINE_TOPICS の「その他のご相談」の番号
   var OPEN_FROM = 9 * 60;        // お電話の希望時間として選べる範囲：9:00〜17:00
   var OPEN_TO = 17 * 60;
-  var CLOSED_DAY = 0;            // 定休日：日曜日（0=日）。日付の一覧に出さない
+  var CLOSED_DAY = 0;            // 定休日：日曜日（0=日）。日付の一覧に出さない（祝日も出さない）
+  // 祝日のほかに休む日（年末年始・お盆など）。'2026-12-31' のように書くと、日付の一覧に出なくなる
+  var EXTRA_CLOSED = [];
   var DATE_DAYS = 30;            // 日付の一覧に出す日数
   var WEEK = ['日', '月', '火', '水', '木', '金', '土'];
 
@@ -68,14 +70,43 @@
       var m = Math.ceil((now.getHours() * 60 + now.getMinutes() + 30) / 30) * 30;
       return Math.max(OPEN_FROM, m);
     };
-    // 日付の一覧：明日から（今日のご希望はお電話で）。日曜日は出さない
+    // 日本の祝日か（国民の祝日・振替休日・国民の休日。春分・秋分は計算式で求める）
+    var isBaseHoliday = function (d) {
+      var y = d.getFullYear(), m = d.getMonth() + 1, day = d.getDate(), w = d.getDay();
+      var nth = Math.floor((day - 1) / 7) + 1;   // その曜日の第何週か
+      var shunbun = Math.floor(20.8431 + 0.242194 * (y - 1980) - Math.floor((y - 1980) / 4));
+      var shubun = Math.floor(23.2488 + 0.242194 * (y - 1980) - Math.floor((y - 1980) / 4));
+      return (m === 1 && (day === 1 || (w === 1 && nth === 2))) ||           // 元日・成人の日
+        (m === 2 && (day === 11 || day === 23)) ||                             // 建国記念の日・天皇誕生日
+        (m === 3 && day === shunbun) ||                                        // 春分の日
+        (m === 4 && day === 29) ||                                             // 昭和の日
+        (m === 5 && (day === 3 || day === 4 || day === 5)) ||                  // 憲法記念日・みどりの日・こどもの日
+        (m === 7 && w === 1 && nth === 3) ||                                   // 海の日
+        (m === 8 && day === 11) ||                                             // 山の日
+        (m === 9 && ((w === 1 && nth === 3) || day === shubun)) ||             // 敬老の日・秋分の日
+        (m === 10 && w === 1 && nth === 2) ||                                  // スポーツの日
+        (m === 11 && (day === 3 || day === 23));                               // 文化の日・勤労感謝の日
+    };
+    var addDays = function (d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); };
+    var isHoliday = function (d) {
+      if (isBaseHoliday(d)) { return true; }
+      // 振替休日：日曜日の祝日のあと、最初の祝日でない日
+      for (var k = 1; k < 7; k++) {
+        var p = addDays(d, -k);
+        if (!isBaseHoliday(p)) { break; }
+        if (p.getDay() === 0) { return true; }
+      }
+      // 国民の休日：祝日にはさまれた日
+      return d.getDay() !== 0 && isBaseHoliday(addDays(d, -1)) && isBaseHoliday(addDays(d, 1));
+    };
+    // 日付の一覧：明日から（今日のご希望はお電話で）。日曜日・祝日・EXTRA_CLOSED の日は出さない
     var dateOptions = function (selected) {
       var h = '<option value="">選択してください</option>';
       var d = new Date();
       d.setDate(d.getDate() + 1);
       for (var i = 1; i <= DATE_DAYS; i++, d.setDate(d.getDate() + 1)) {
         var v = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
-        if (d.getDay() === CLOSED_DAY) { continue; }
+        if (d.getDay() === CLOSED_DAY || isHoliday(d) || EXTRA_CLOSED.indexOf(v) !== -1) { continue; }
         h += '<option value="' + v + '"' + (selected === v ? ' selected' : '') + '>' + dateLabel(v) + (i === 1 ? '・明日' : '') + '</option>';
       }
       return h;
@@ -261,12 +292,12 @@
       },
       method: function () {
         return '<h2 class="line-dialog__title" id="line-dialog-title">ご連絡方法を<wbr>選んでください</h2>' +
-          choiceList(['LINEで<wbr>連絡してほしい<span class="line-dialog__sub">※返信に<wbr>少しお時間を<wbr>いただく<wbr>場合があります</span>', '電話で<wbr>連絡してほしい'],
+          choiceList(['LINEで<wbr>連絡してほしい<span class="line-dialog__sub">※返信は<wbr>平日・土曜日の<wbr><span class="nw">9:00〜17:00</span>です。<wbr>少しお時間を<wbr>いただく<wbr>場合があります</span>', '電話で<wbr>連絡してほしい'],
             state.method === 'LINE' ? 0 : (state.method === '電話' ? 1 : -1));
       },
       call: function () {
         return '<h2 class="line-dialog__title" id="line-dialog-title">お電話の<wbr>ご希望を<wbr>教えてください</h2>' +
-          '<p class="line-dialog__lead">明日以降の<wbr>9:00〜17:00の間で<wbr>お選びください。<wbr>日曜日は<wbr>定休日です。</p>' +
+          '<p class="line-dialog__lead">明日以降の<wbr>平日・土曜日、<wbr><span class="nw">9:00〜17:00</span>の間で<wbr>お選びください。<wbr>日曜日・祝日は<wbr>お休みです。</p>' +
           '<p class="line-dialog__urgent">本日中の<wbr>ご連絡を<wbr>希望の方・<wbr>お急ぎの方は、<wbr>お電話ください。<br>' +
           '<a href="tel:0867445552">真庭 <span class="nw">0867-44-5552</span></a><a href="tel:0868201653">津山支店 <span class="nw">0868-20-1653</span></a></p>' +
           '<div class="line-form">' +
@@ -291,7 +322,7 @@
           '<button type="button" class="btn btn--line line-dialog__next" data-next>' + nextLabel() + '</button></div>';
       },
       confirm: function () {
-        var notice = state.method === 'LINE' ? '<p class="line-dialog__notice">※⁠LINEでの<wbr>ご返信は、<wbr>少しお時間を<wbr>いただく場合が<wbr>あります。<wbr>あらかじめ<wbr>ご了承ください。</p>' : '';
+        var notice = state.method === 'LINE' ? '<p class="line-dialog__notice">※⁠LINEでの<wbr>ご返信は、<wbr>平日・土曜日の<wbr><span class="nw">9:00〜17:00</span>に<wbr>順次いたします<wbr>（日曜日・祝日は<wbr>お休み）。<wbr>少しお時間を<wbr>いただく場合が<wbr>あります。</p>' : '';
         if (!isTouch()) {
           // PC：左にメッセージ、右に QR コード
           return '<h2 class="line-dialog__title" id="line-dialog-title">スマホで<wbr>QRコードを<wbr>読み取ってください</h2>' +
@@ -306,7 +337,7 @@
         return '<h2 class="line-dialog__title" id="line-dialog-title">この内容で<wbr>LINEを開きます</h2>' +
           '<p class="line-dialog__lead">LINEが開いたら、<wbr>送信ボタンを<wbr>押してください。</p>' +
           '<div class="line-dialog__preview">' + esc(message()).replace(/\n/g, '<br>') + '</div>' +
-          (state.method === 'LINE' ? '<p class="line-dialog__notice">※⁠LINEでの<wbr>ご返信は、<wbr>少しお時間を<wbr>いただく場合が<wbr>あります。<wbr>あらかじめ<wbr>ご了承ください。</p>' : '') +
+          (state.method === 'LINE' ? '<p class="line-dialog__notice">※⁠LINEでの<wbr>ご返信は、<wbr>平日・土曜日の<wbr><span class="nw">9:00〜17:00</span>に<wbr>順次いたします<wbr>（日曜日・祝日は<wbr>お休み）。<wbr>少しお時間を<wbr>いただく場合が<wbr>あります。</p>' : '') +
           '<button type="button" class="btn btn--line line-dialog__send" data-send>' +
           '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 3C6.48 3 2 6.58 2 11c0 2.47 1.4 4.68 3.6 6.15L5 21l4.06-2.25c.94.17 1.92.25 2.94.25 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/></svg>' +
           'LINEを開いて<wbr>送る</button>';
