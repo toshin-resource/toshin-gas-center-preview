@@ -762,7 +762,7 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 .intro__throw-x, .intro__out-x, .intro__clothes { opacity: 0; }
 
 .intro-play .intro__dryer { animation: intro-pop .6s cubic-bezier(.2,.8,.3,1.25) both; transform-box: fill-box; transform-origin: center bottom; }
-.intro-play .intro__walk { animation: toma-walk 1.1s .15s cubic-bezier(.25,.8,.35,1) both; }
+.intro-play .intro__walk { animation: toma-walk 1.1s .15s cubic-bezier(.3,.55,.45,1) both; }
 .intro-play .intro__bob { animation: toma-bob 7s both; }
 .intro-play .intro__sway { animation: toma-sway 7s both; }
 .intro-play .intro__throw-x { animation: throw-x 7s both; }
@@ -785,20 +785,37 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 
 @keyframes intro-pop { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
 @keyframes toma-walk { from { transform: translateX(-150%); } to { transform: none; } }
-/* 上下の動き：歩く（ふわふわ）→ 投げる前に小さくジャンプ → 最後に2回ジャンプ（しゃがむ・着地でつぶれる） */
+/* とーまくんの動き（7秒）。3つの層を重ねて自然に見せる
+   bob＝上下・つぶれ（足元が基準）、sway＝傾き（足元が基準）、walk＝横移動
+   0.15〜1.25s 歩いてくる（一歩ごとに上下＋左右に体をゆらす、だんだんゆっくり）
+   1.25〜1.4s 体を後ろにそらしてためる → 前に振ってTシャツを投げる
+   2.1〜4.4s 乾燥を待つ（ゆっくり息をする・乾燥機をのぞきこむ）
+   4.5s「ピピッ」でびっくり → 4.8s Tシャツを受け取る → 喜んで2回ジャンプ */
 @keyframes toma-bob {
-  0%, 2.5% { transform: none; animation-timing-function: ease-out; }
-  5% { transform: translateY(-4%); animation-timing-function: ease-in; }
-  7.5% { transform: none; animation-timing-function: ease-out; }
-  10% { transform: translateY(-4%); animation-timing-function: ease-in; }
-  12.5% { transform: none; animation-timing-function: ease-out; }
-  15% { transform: translateY(-4%); animation-timing-function: ease-in; }
-  17.5% { transform: none; animation-timing-function: ease-in-out; }
-  18.5% { transform: scale(1.05, .94); animation-timing-function: ease-out; }
-  21.5% { transform: translateY(-11%) scale(.98, 1.03); animation-timing-function: ease-in; }
-  24.5% { transform: scale(1.05, .94); animation-timing-function: ease-out; }
-  26.5%, 75% { transform: none; animation-timing-function: ease-in-out; }
-  77.5% { transform: scale(1.06, .92); animation-timing-function: ease-out; }
+  0%, 2% { transform: none; animation-timing-function: ease-out; }
+  4% { transform: translateY(-3.5%) scale(.99, 1.01); animation-timing-function: ease-in; }
+  6% { transform: scale(1.02, .98); animation-timing-function: ease-out; }
+  8% { transform: translateY(-3.5%) scale(.99, 1.01); animation-timing-function: ease-in; }
+  10% { transform: scale(1.02, .98); animation-timing-function: ease-out; }
+  12% { transform: translateY(-3%) scale(.99, 1.01); animation-timing-function: ease-in; }
+  14% { transform: scale(1.02, .98); animation-timing-function: ease-out; }
+  15.8% { transform: translateY(-1.8%); animation-timing-function: ease-in; }
+  17.6% { transform: scale(1.03, .97); animation-timing-function: ease-in-out; }
+  19% { transform: scale(1.04, .95); animation-timing-function: cubic-bezier(.2,.8,.3,1.2); }
+  20.5% { transform: translateY(-3%) scale(.97, 1.04); animation-timing-function: ease-in-out; }
+  24%, 29% { transform: none; animation-timing-function: ease-in-out; }
+  34% { transform: scale(1.01, 1.02); animation-timing-function: ease-in-out; }
+  40% { transform: none; animation-timing-function: ease-in-out; }
+  46% { transform: scale(1.01, 1.02); animation-timing-function: ease-in-out; }
+  52% { transform: none; animation-timing-function: ease-in-out; }
+  58% { transform: scale(1.01, 1.02); animation-timing-function: ease-in-out; }
+  63% { transform: none; animation-timing-function: ease-out; }
+  64.3% { transform: scale(1.03, .96); animation-timing-function: ease-out; }
+  65.8% { transform: translateY(-6%) scale(.98, 1.03); animation-timing-function: ease-in; }
+  67.3% { transform: scale(1.02, .98); animation-timing-function: ease-in-out; }
+  69%, 75.5% { transform: none; animation-timing-function: ease-out; }
+  76.8% { transform: scale(1.04, .95); animation-timing-function: ease-in-out; }
+  78% { transform: scale(1.06, .92); animation-timing-function: ease-out; }
   81% { transform: translateY(-18%) scale(.97, 1.04); animation-timing-function: ease-in; }
   84.5% { transform: scale(1.07, .91); animation-timing-function: ease-out; }
   87% { transform: none; animation-timing-function: ease-out; }
@@ -806,13 +823,28 @@ html.intro-on, html.intro-on body { overflow: hidden; }
   92% { transform: scale(1.04, .95); animation-timing-function: ease-out; }
   94.5%, 100% { transform: none; }
 }
-/* 乾燥中はゆらゆら待つ */
+/* 傾き：歩くときは一歩ごとに左右へ、投げる前は後ろにそらして前へ、待つ間はのぞきこむ、最後は喜んでゆれる */
 @keyframes toma-sway {
-  0%, 31% { transform: none; animation-timing-function: ease-in-out; }
-  37% { transform: rotate(4deg); animation-timing-function: ease-in-out; }
-  46% { transform: rotate(-4deg); animation-timing-function: ease-in-out; }
-  55% { transform: rotate(4deg); animation-timing-function: ease-in-out; }
-  62%, 100% { transform: none; }
+  0%, 2% { transform: rotate(-4deg); animation-timing-function: ease-in-out; }
+  6% { transform: rotate(5deg); animation-timing-function: ease-in-out; }
+  10% { transform: rotate(-4deg); animation-timing-function: ease-in-out; }
+  14% { transform: rotate(4deg); animation-timing-function: ease-in-out; }
+  16.5% { transform: rotate(0deg); animation-timing-function: ease-in-out; }
+  19% { transform: rotate(-9deg); animation-timing-function: cubic-bezier(.3,0,.2,1); }
+  20.8% { transform: rotate(10deg); animation-timing-function: ease-in-out; }
+  23% { transform: rotate(-2deg); animation-timing-function: ease-in-out; }
+  25.5%, 30% { transform: none; animation-timing-function: ease-in-out; }
+  37% { transform: rotate(5deg); animation-timing-function: ease-in-out; }
+  41% { transform: rotate(5deg); animation-timing-function: ease-in-out; }
+  47% { transform: rotate(-1.5deg); animation-timing-function: ease-in-out; }
+  53% { transform: rotate(4deg); animation-timing-function: ease-in-out; }
+  57% { transform: rotate(4deg); animation-timing-function: ease-in-out; }
+  62%, 76% { transform: none; animation-timing-function: ease-in-out; }
+  79.5% { transform: rotate(-3deg); animation-timing-function: ease-in-out; }
+  83% { transform: rotate(3deg); animation-timing-function: ease-in-out; }
+  88% { transform: rotate(-2deg); animation-timing-function: ease-in-out; }
+  92% { transform: rotate(1.5deg); animation-timing-function: ease-in-out; }
+  95%, 100% { transform: none; }
 }
 /* Tシャツを投げる：横は一定の速さ、縦は上がって落ちる（放物線） */
 @keyframes throw-x {
