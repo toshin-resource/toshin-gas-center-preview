@@ -511,6 +511,7 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
 .footer-info div { display: flex; gap: 12px; padding: 3px 0; }
 .footer-info dt { color: #aab6c4; min-width: 6.5em; flex: none; }
 .footer-info dd { margin: 0; }
+.footer-branch { margin: 18px 0 6px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.14); font-size: 1rem; font-weight: 700; color: #fff; }
 /* 住所の「Googleマップで見る」リンク（地図のピンのアイコン付き） */
 .map-link { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; padding: 4px 12px 4px 8px; border-radius: 999px;
   font-size: .85rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
