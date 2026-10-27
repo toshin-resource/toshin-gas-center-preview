@@ -532,6 +532,118 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
 @keyframes hero-zoom { from { transform: scale(1.07); } to { transform: scale(1); } }
 @keyframes fade-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 
+/* ---------- LINEで相談：相談内容を選ぶ画面 ---------- */
+.line-dialog { width: min(92vw, 440px); max-height: calc(100vh - 32px); padding: 0; border: 0; border-radius: 16px; box-shadow: 0 20px 60px rgba(20, 35, 55, .3); color: var(--c-text); }
+.line-dialog::backdrop { background: rgba(20, 30, 45, .55); }
+.line-dialog__body { position: relative; padding: 28px 20px 20px; }
+.line-dialog__close { position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; font-size: 1.5rem; line-height: 1; color: var(--c-muted); cursor: pointer; }
+.line-dialog__close:hover { background: var(--c-bg-soft); color: var(--c-text); }
+.line-dialog__eyebrow { margin: 0 0 4px; font-size: .78rem; font-weight: 700; letter-spacing: .15em; color: var(--c-line-green); }
+.line-dialog__title { margin: 0 44px 8px 0; font-size: 1.25rem; font-weight: 700; }
+.line-dialog__lead { margin: 0 0 16px; font-size: .88rem; color: var(--c-muted); line-height: 1.7; }
+.line-dialog__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.line-dialog__choice {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 12px 14px;
+  border: 2px solid var(--c-line); border-radius: 12px; background: #fff; text-align: left; cursor: pointer;
+  font: 700 1rem/1.5 var(--font); color: var(--c-text); transition: border-color .2s, background .2s;
+}
+.line-dialog__choice:hover, .line-dialog__choice:focus-visible { border-color: var(--c-line-green); background: #f0f8f3; }
+.line-dialog__num { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--c-line-green); color: #fff; font-size: .9rem; }
+.line-dialog__label { flex: 1; min-width: 0; }
+.line-dialog__list li { min-width: 0; }
+.line-dialog__arrow { flex: none; font-size: 1.4rem; color: var(--c-line-green); }
+.line-dialog__note { margin: 16px 0 0; text-align: center; font-size: .85rem; }
+.line-dialog__note a { color: var(--c-muted); }
+
+/* ---------- intro（トップページのオープニング：とーまくんが乾燥機を使う 約6秒） ---------- */
+.intro { display: none; }
+html.intro-on, html.intro-on body { overflow: hidden; }
+.intro-on .intro {
+  display: grid; place-items: center; position: fixed; inset: 0; z-index: 1000; padding: 16px;
+  background: radial-gradient(circle at 50% 38%, #ffffff 0, #eef3f9 58%, #e1e9f3 100%);
+}
+.intro-on .intro.is-hiding { opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility .6s; }
+/* オープニング中はトップの写真・見出しの動きを止めておき、消え始めたら再生 */
+.intro-on:not(.intro-leaving) .hero__media img, .intro-on:not(.intro-leaving) .hero__copy > * { animation-play-state: paused; }
+.intro__inner { display: flex; flex-direction: column; align-items: center; width: min(92vw, 560px); }
+.intro__stage { position: relative; width: 100%; aspect-ratio: 4 / 3; }
+.intro__scene { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.intro__front { pointer-events: none; }
+.intro__scene .intro__lcd { font: 700 11px/1 "Courier New", monospace; fill: #7cf0a0; }
+.intro__scene .intro__bubble text { font: 700 15px/1 var(--font); fill: #1f3b5a; }
+.intro__heat path { fill: none; stroke: #f19975; stroke-width: 3; stroke-linecap: round; }
+.intro__walk { position: absolute; left: 4%; bottom: 11.7%; width: 28%; }
+.intro__sway img { display: block; width: 100%; height: auto; }
+.intro__caption { margin-top: 6px; text-align: center; }
+.intro__catch { font-size: clamp(1.25rem, 5vw, 1.9rem); font-weight: 700; color: var(--c-accent); letter-spacing: .08em; margin: 0 0 10px; }
+.intro__logo { display: block; height: 34px; width: auto; margin: 0 auto; }
+.intro__skip {
+  position: absolute; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); min-height: 44px; padding: 8px 18px;
+  border: 1px solid #c9d3df; border-radius: 999px; background: rgba(255,255,255,.9); color: var(--c-text);
+  font: 700 .9rem var(--font); cursor: pointer;
+}
+.intro__skip:hover { background: #fff; border-color: var(--c-accent); }
+
+/* 時間割（6秒）：0.2s 登場 → 1.15s 洗濯物を入れる → 1.8〜3.8s 乾燥 → 3.9s ピピッ → 4.1s タオル → 4.8s ジャンプ */
+.intro-on .intro__dryer { animation: intro-pop .5s cubic-bezier(.2,.8,.3,1.3) both; transform-box: fill-box; transform-origin: center bottom; }
+.intro-on .intro__walk { animation: toma-walk .9s .2s ease-out both; }
+.intro-on .intro__bob { animation: toma-bob 6s linear both; }
+.intro-on .intro__sway { animation: toma-sway 6s linear both; transform-origin: 50% 100%; }
+.intro-on .intro__throw { animation: intro-throw 6s linear both; transform-box: fill-box; transform-origin: center; }
+.intro-on .intro__led { animation: intro-led 6s linear both; }
+.intro-on .intro__clothes { animation: intro-spin 6s linear both; transform-box: view-box; transform-origin: 280px 192px; }
+.intro-on .intro__heat { animation: intro-heat 6s linear both; }
+.intro-on .intro__heat path { animation: intro-rise .9s ease-in-out infinite; }
+.intro-on .intro__heat path:nth-child(2) { animation-delay: .3s; }
+.intro-on .intro__heat path:nth-child(3) { animation-delay: .6s; }
+.intro-on .intro__bubble { animation: intro-bubble 6s linear both; transform-box: fill-box; transform-origin: 20% 100%; }
+.intro-on .intro__fluffy { animation: intro-fluffy 6s linear both; transform-box: fill-box; transform-origin: center; }
+.intro-on .intro__sparkles path { animation: intro-spark 6s linear both; transform-box: fill-box; transform-origin: center; }
+.intro-on .intro__sparkles path:nth-child(2n) { animation-delay: .15s; }
+.intro-on .intro__caption { animation: intro-cap .6s 4.3s ease-out both; }
+
+@keyframes intro-pop { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
+@keyframes toma-walk { from { transform: translateX(-150%); } to { transform: none; } }
+@keyframes toma-bob {
+  0%, 3.3% { transform: none; }
+  7% { transform: translateY(-4%); } 10.8% { transform: none; } 14.5% { transform: translateY(-4%); }
+  18.3%, 19.2% { transform: none; } 22% { transform: translateY(-12%); } 25%, 80% { transform: none; }
+  83.5% { transform: translateY(-18%); } 87% { transform: none; } 90% { transform: translateY(-10%); } 93%, 100% { transform: none; }
+}
+@keyframes toma-sway {
+  0%, 31% { transform: none; } 38% { transform: rotate(4deg); } 45% { transform: rotate(-4deg); }
+  52% { transform: rotate(4deg); } 59% { transform: rotate(-4deg); } 63%, 100% { transform: none; }
+}
+@keyframes intro-throw {
+  0%, 19% { opacity: 0; transform: none; }
+  19.2% { opacity: 1; transform: none; }
+  24% { opacity: 1; transform: translate(84px, -66px) rotate(200deg); }
+  29% { opacity: 1; transform: translate(160px, -2px) rotate(360deg) scale(.35); }
+  30%, 100% { opacity: 0; transform: translate(160px, -2px) scale(.35); }
+}
+@keyframes intro-led { 0%, 29% { fill: #c9d3df; } 30%, 64% { fill: #ff9f43; } 65%, 100% { fill: #4cd07d; } }
+@keyframes intro-spin {
+  0%, 30% { transform: none; animation-timing-function: ease-in-out; }
+  63%, 100% { transform: rotate(1080deg); }
+}
+@keyframes intro-heat { 0%, 31% { opacity: 0; } 34%, 61% { opacity: 1; } 64%, 100% { opacity: 0; } }
+@keyframes intro-rise { 0% { transform: translateY(6px); opacity: .2; } 50% { opacity: 1; } 100% { transform: translateY(-8px); opacity: 0; } }
+@keyframes intro-bubble {
+  0%, 64% { opacity: 0; transform: scale(.4); }
+  67% { opacity: 1; transform: scale(1.1); } 69%, 100% { opacity: 1; transform: none; }
+}
+@keyframes intro-fluffy {
+  0%, 68% { opacity: 0; transform: scale(.3); }
+  71% { opacity: 1; transform: translate(0, -36px) scale(1.15); }
+  75% { opacity: 1; transform: translate(-80px, -78px) scale(1.1); }
+  80%, 100% { opacity: 1; transform: translate(-206px, 30px) scale(1.25); }
+}
+@keyframes intro-spark {
+  0%, 80% { opacity: 0; transform: scale(0); }
+  84% { opacity: 1; transform: scale(1.25); } 90% { transform: scale(.9); } 100% { opacity: 1; transform: none; }
+}
+@keyframes intro-cap { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
 /* utilities */
 .mt-0 { margin-top: 0 !important; }
 .mt-1 { margin-top: 12px !important; }
