@@ -397,7 +397,8 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
 .spec-table thead th { background: var(--c-accent); color: #fff; font-weight: 500; }
 .spec-table thead tr.sub th { background: #36557a; font-size: .78rem; }
 .spec-table tbody th { background: var(--c-bg-soft); font-weight: 500; text-align: left; white-space: nowrap; position: sticky; left: 0; z-index: 1; }
-.spec-table thead th:first-child { position: sticky; left: 0; z-index: 2; }
+/* 左上の「機能」「項目」だけを左に固定（2段目の見出しの最初の機種は固定しない） */
+.spec-table thead tr:first-child th:first-child { position: sticky; left: 0; z-index: 2; }
 .spec-table .yes { color: var(--c-accent); font-size: 1rem; }
 .spec-table .no { color: #6b737c; }
 .spec-table .left { text-align: left; }
@@ -694,6 +695,13 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
 }
 .line-check:has(input:checked) { border-color: var(--c-line-green); background: #f0f8f3; }
 .line-check__input { flex: none; width: 22px; height: 22px; margin: 0; accent-color: var(--c-line-green); }
+/* 見積もり依頼：機種・ガスの種類・設置場所（それぞれ1つ選ぶ） */
+.line-radios { min-width: 0; margin: 0; padding: 0; border: 0; }
+.line-radios .line-form__label { display: block; margin: 8px 0 6px; padding: 0; }
+.line-radios__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.line-radio { gap: 8px; min-width: 0; min-height: 46px; padding: 6px 10px; font-size: .9rem; line-height: 1.35; }
+.line-radio .line-check__input { width: 18px; height: 18px; }
+.line-radio:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .line-form__time { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; }
 .line-form__error { min-height: 1.4em; margin: 6px 0 4px; color: #b3261e; font-size: .85rem; font-weight: 700; }
 .line-dialog__note { margin: 16px 0 0; text-align: center; font-size: .85rem; }

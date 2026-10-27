@@ -20,15 +20,23 @@
   var LINE_SIGN = '\n\n（ホームページから送信）';
   var LINE_TOPICS = [
     { label: '乾太くんの<wbr>無料レンタルを<wbr>試したい', title: '無料レンタルを試したい', text: '乾太くんの無料レンタルを試してみたいです。詳しく教えてください。' },
-    { label: '乾太くんの<wbr>購入を<wbr>検討している', title: '購入を検討しています', text: '乾太くんの購入を検討しています。お見積りをお願いします。' },
+    { label: '乾太くんの<wbr>購入を<wbr>検討している', title: '購入を検討しています', text: '乾太くんの購入を検討しています。詳しく教えてください。' },
+    { label: '乾太くんの<wbr>見積もりを<wbr>依頼したい', title: 'お見積りのご依頼', text: '乾太くんのお見積りをお願いします。' },
     { label: '乾太くんについて<wbr>もっと知りたい', title: '乾太くんについて知りたい', text: '乾太くんについて、もっと詳しく知りたいです。' },
     { label: 'その他の<wbr>ご相談', title: 'その他のご相談', text: '' }
   ];
   var LINE_AREAS = ['真庭市', '津山市', 'その他'];
   // 「乾太くんについてもっと知りたい」を選んだときの、知りたいことの選択肢（いくつでも選べる）
   var LINE_QUESTIONS = ['乾燥時間や仕上がり', 'ガス代・電気代', 'うちに設置できるか（場所・工事）', '機種の選び方・価格', 'お手入れの方法', '無料レンタルについて'];
-  var TOPIC_KNOW = 2;            // LINE_TOPICS の「もっと知りたい」の番号（0から数える）
-  var TOPIC_OTHER = 3;           // LINE_TOPICS の「その他のご相談」の番号
+  // 「見積もりを依頼したい」を選んだときに聞くこと（それぞれ1つ選ぶ）
+  var LINE_ESTIMATE = [
+    { key: 'model', label: 'ご希望の機種', options: ['デラックス 9kg', 'デラックス 6kg', 'スタンダード 8kg', 'スタンダード 5kg', 'スタンダード 3kg', 'まだ決めていない'] },
+    { key: 'gas', label: 'ガスの種類', options: ['プロパンガス', '都市ガス', 'わからない'] },
+    { key: 'place', label: '設置場所', options: ['屋内（洗面所など）', '屋外（軒下）', 'まだ決めていない'] }
+  ];
+  var TOPIC_ESTIMATE = 2;        // LINE_TOPICS の「見積もりを依頼したい」の番号（0から数える）
+  var TOPIC_KNOW = 3;            // LINE_TOPICS の「もっと知りたい」の番号
+  var TOPIC_OTHER = 4;           // LINE_TOPICS の「その他のご相談」の番号
   var OPEN_FROM = 9 * 60;        // お電話の希望時間として選べる範囲：9:00〜17:00
   var OPEN_TO = 17 * 60;
   var CLOSED_DAY = 0;            // 定休日：日曜日（0=日）。日付の一覧に出さない
@@ -81,6 +89,7 @@
       // 無料レンタル・購入検討の「ご質問・ご要望（任意）」は最後（お名前のあと）に聞く
       var detailFirst = state.topic === TOPIC_KNOW || state.topic === TOPIC_OTHER;
       var s = ['topic'];
+      if (state.topic === TOPIC_ESTIMATE) { s.push('estimate'); }
       if (detailFirst) { s.push('detail'); }
       s.push('area', 'method');
       if (state.method === '電話') { s.push('call'); }
@@ -96,6 +105,9 @@
       var area = state.area === 'その他' ? 'その他' + (state.areaOther ? '（' + state.areaOther + '）' : '') : state.area;
       var lines = ['【' + t.title + '】'];
       if (t.text) { lines.push(t.text); }
+      if (state.topic === TOPIC_ESTIMATE) {
+        for (var k = 0; k < LINE_ESTIMATE.length; k++) { lines.push('■' + LINE_ESTIMATE[k].label + '：' + state[LINE_ESTIMATE[k].key]); }
+      }
       if (state.topic === TOPIC_KNOW) {
         if (state.questions && state.questions.length) { lines.push('■知りたいこと：' + state.questions.join('、')); }
         if (state.detail) { lines.push('■ご質問：' + state.detail); }
@@ -194,7 +206,7 @@
             '<div class="line-form">' +
             '<label class="line-form__label" for="lf-detail">ご質問・ご要望<span class="line-form__opt">（自由記入・任意）</span></label>' +
             '<textarea class="line-form__input line-form__textarea" id="lf-detail" rows="4" placeholder="' +
-            (state.topic === 0 ? '例：レンタルの期間を知りたいです' : '例：9kgと6kgで迷っています') + '">' + esc(state.detail || '') + '</textarea>' +
+            (state.topic === 0 ? '例：レンタルの期間を知りたいです' : state.topic === TOPIC_ESTIMATE ? '例：今の乾燥機からの買い替えです' : '例：9kgと6kgで迷っています') + '">' + esc(state.detail || '') + '</textarea>' +
             '<p class="line-form__error" role="alert" data-error></p>' +
             '<button type="button" class="btn btn--line line-dialog__next" data-next>' + nextLabel() + '</button></div>';
         }
@@ -218,6 +230,23 @@
         }
         return '<h2 class="line-dialog__title" id="line-dialog-title">ご相談内容を<wbr>ご記入ください</h2>' +
           '<div class="line-form">' + text +
+          '<p class="line-form__error" role="alert" data-error></p>' +
+          '<button type="button" class="btn btn--line line-dialog__next" data-next>次へ</button></div>';
+      },
+      estimate: function () {
+        var groups = '';
+        for (var g = 0; g < LINE_ESTIMATE.length; g++) {
+          var item = LINE_ESTIMATE[g];
+          groups += '<fieldset class="line-radios"><legend class="line-form__label">' + item.label + '</legend><div class="line-radios__list">';
+          for (var o = 0; o < item.options.length; o++) {
+            groups += '<label class="line-check line-radio"><input type="radio" class="line-check__input" name="lf-' + item.key + '" value="' + o + '"' +
+                      (state[item.key] === item.options[o] ? ' checked' : '') + '><span>' + item.options[o].replace('（', '<wbr>（').replace('まだ決めて', 'まだ<wbr>決めて') + '</span></label>';
+          }
+          groups += '</div></fieldset>';
+        }
+        return '<h2 class="line-dialog__title" id="line-dialog-title">お見積りの<wbr>内容を<wbr>選んでください</h2>' +
+          '<p class="line-dialog__lead">わかる範囲で<wbr>お選びください。<wbr>現地確認・お見積りは<wbr>無料です。</p>' +
+          '<div class="line-form">' + groups +
           '<p class="line-form__error" role="alert" data-error></p>' +
           '<button type="button" class="btn btn--line line-dialog__next" data-next>次へ</button></div>';
       },
@@ -361,7 +390,17 @@
         return;
       }
       if (t.closest('[data-next]')) {
-        if (key === 'detail') {
+        if (key === 'estimate') {
+          var missing = '';
+          for (var g = 0; g < LINE_ESTIMATE.length; g++) {
+            var item = LINE_ESTIMATE[g];
+            var picked = dlg.querySelector('input[name="lf-' + item.key + '"]:checked');
+            state[item.key] = picked ? item.options[+picked.value] : '';
+            if (!picked && !missing) { missing = item.label; }
+          }
+          if (missing) { showError(missing + 'を選んでください。'); } else { go(1); }
+        }
+        else if (key === 'detail') {
           state.detail = dlg.querySelector('#lf-detail').value.trim();
           state.questions = [];
           var boxes = dlg.querySelectorAll('.line-check__input:checked');
