@@ -341,6 +341,7 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
   .product__tags li { font-size: .64rem; padding: 0 5px; }
   .product__price { font-size: .66rem; padding-top: 6px; letter-spacing: 0; }
   .product__price strong { font-size: 1.02rem; }
+  .product .price-deal { font-size: .74rem; margin-top: 4px; }
 }
 @media (max-width: 339px) {
   .product-grid, .product-grid--2 { grid-template-columns: minmax(0, 1fr); }
@@ -351,6 +352,9 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
 .product__sub { font-size: .78rem; color: var(--c-muted); line-height: 1.6; margin-bottom: 10px; }
 .product__price { border-top: 1px solid var(--c-line); padding-top: 10px; margin-top: auto; font-size: .78rem; color: var(--c-muted); line-height: 1.5; }
 .product__price strong { display: block; font-size: 1.3rem; color: var(--c-text); font-weight: 700; letter-spacing: .02em; }
+/* 希望小売価格の下の「当社限定価格でお見積り」（赤字） */
+.product__price:has(+ .price-deal) { margin-bottom: 0; }
+.price-deal { margin: 6px 0 0; color: #d6001c; font-size: .9rem; font-weight: 800; line-height: 1.45; }
 .product__tags { list-style: none; padding: 0; margin: 0 0 10px; display: flex; flex-wrap: wrap; gap: 6px; }
 .product__tags li { min-width: 0; max-width: 100%; font-size: .72rem; border: 1px solid var(--c-line); border-radius: 4px; padding: 1px 8px; color: var(--c-muted); background: var(--c-bg-soft); }
 .type-label { display: inline-block; background: var(--c-accent); color: #fff; font-size: .8rem; letter-spacing: .15em; padding: 3px 12px; border-radius: 4px; margin-bottom: 10px; }
