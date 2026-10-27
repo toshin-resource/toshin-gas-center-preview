@@ -267,7 +267,7 @@
       call: function () {
         return '<h2 class="line-dialog__title" id="line-dialog-title">お電話の<wbr>ご希望を<wbr>教えてください</h2>' +
           '<p class="line-dialog__lead">明日以降の<wbr>9:00〜17:00の間で<wbr>お選びください。<wbr>日曜日は<wbr>定休日です。</p>' +
-          '<p class="line-dialog__urgent">本日中の<wbr>ご希望・<wbr>お急ぎの方は、<wbr>お電話ください。<br>' +
+          '<p class="line-dialog__urgent">本日中の<wbr>ご連絡を<wbr>希望の方・<wbr>お急ぎの方は、<wbr>お電話ください。<br>' +
           '<a href="tel:0867445552">真庭 <span class="nw">0867-44-5552</span></a><a href="tel:0868201653">津山支店 <span class="nw">0868-20-1653</span></a></p>' +
           '<div class="line-form">' +
           '<label class="line-form__label" for="lf-date">ご希望の日</label>' +
