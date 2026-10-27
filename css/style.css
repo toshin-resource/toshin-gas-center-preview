@@ -352,7 +352,7 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
 .product__sub { font-size: .78rem; color: var(--c-muted); line-height: 1.6; margin-bottom: 10px; }
 .product__price { border-top: 1px solid var(--c-line); padding-top: 10px; margin-top: auto; font-size: .78rem; color: var(--c-muted); line-height: 1.5; }
 .product__price strong { display: block; font-size: 1.3rem; color: var(--c-text); font-weight: 700; letter-spacing: .02em; }
-/* 希望小売価格の下の「当社限定価格でお見積り」（赤字） */
+/* 希望小売価格の下の「当社特別価格でお見積り」（赤字） */
 .product__price:has(+ .price-deal) { margin-bottom: 0; }
 .price-deal { margin: 6px 0 0; color: #d6001c; font-size: .9rem; font-weight: 800; line-height: 1.45; }
 .product__tags { list-style: none; padding: 0; margin: 0 0 10px; display: flex; flex-wrap: wrap; gap: 6px; }
