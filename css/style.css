@@ -713,7 +713,7 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 .intro__stage { position: relative; width: 100%; aspect-ratio: 4 / 3; }
 .intro__scene { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .intro__front { pointer-events: none; }
-.intro__scene .intro__lcd { font: 700 11px/1 "Courier New", monospace; fill: #7cf0a0; }
+.intro__scene .intro__lcd { font: 700 10px/1 "Courier New", monospace; fill: #7cf0a0; }
 .intro__scene .intro__bubble text { font: 700 15px/1 var(--font); fill: #1f3b5a; }
 .intro__heat path { fill: none; stroke: #f19975; stroke-width: 3; stroke-linecap: round; }
 .intro__walk { position: absolute; left: 4%; bottom: 11.7%; width: 28%; }
@@ -745,7 +745,7 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 .intro-play .intro__throw-y { animation: throw-y 7s both; }
 .intro-play .intro__throw-r { animation: throw-r 7s both; transform-box: fill-box; transform-origin: center; }
 .intro-play .intro__led { animation: intro-led 7s linear both; }
-.intro-play .intro__clothes { animation: intro-spin 7s both; transform-box: view-box; transform-origin: 280px 192px; }
+.intro-play .intro__clothes { animation: intro-spin 7s both; transform-box: view-box; transform-origin: 280px 172px; }
 .intro-play .intro__heat { animation: intro-heat 7s ease-in-out both; }
 .intro-play .intro__heat path { animation: intro-rise 1.1s ease-in-out infinite; }
 .intro-play .intro__heat path:nth-child(2) { animation-delay: .37s; }
@@ -798,8 +798,8 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 }
 @keyframes throw-y {
   0%, 19.5% { transform: none; animation-timing-function: cubic-bezier(.2,.6,.4,1); }
-  24% { transform: translateY(-74px); animation-timing-function: cubic-bezier(.6,0,.8,.4); }
-  29%, 100% { transform: translateY(-4px); }
+  24% { transform: translateY(-92px); animation-timing-function: cubic-bezier(.6,0,.8,.4); }
+  29%, 100% { transform: translateY(-28px); }
 }
 @keyframes throw-r {
   0%, 19.5% { transform: none; animation-timing-function: ease-in-out; }
@@ -828,14 +828,14 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 }
 @keyframes out-y {
   0%, 68.5% { transform: none; animation-timing-function: cubic-bezier(.2,.6,.4,1); }
-  72% { transform: translateY(-82px); animation-timing-function: cubic-bezier(.6,0,.8,.4); }
-  76.5% { transform: translateY(26px); animation-timing-function: ease-out; }
-  78.5% { transform: translateY(22px); animation-timing-function: ease-in-out; }
-  81% { transform: translateY(-6px); animation-timing-function: ease-in; }
-  84.5% { transform: translateY(26px); animation-timing-function: ease-out; }
-  87% { transform: translateY(26px); animation-timing-function: ease-out; }
-  89.5% { transform: translateY(12px); animation-timing-function: ease-in; }
-  92%, 100% { transform: translateY(26px); }
+  72% { transform: translateY(-58px); animation-timing-function: cubic-bezier(.6,0,.8,.4); }
+  76.5% { transform: translateY(50px); animation-timing-function: ease-out; }
+  78.5% { transform: translateY(46px); animation-timing-function: ease-in-out; }
+  81% { transform: translateY(18px); animation-timing-function: ease-in; }
+  84.5% { transform: translateY(50px); animation-timing-function: ease-out; }
+  87% { transform: translateY(50px); animation-timing-function: ease-out; }
+  89.5% { transform: translateY(36px); animation-timing-function: ease-in; }
+  92%, 100% { transform: translateY(50px); }
 }
 @keyframes out-s {
   0%, 68% { transform: scale(.35); animation-timing-function: cubic-bezier(.2,.8,.3,1.3); }
