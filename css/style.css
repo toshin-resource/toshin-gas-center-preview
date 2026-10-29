@@ -88,8 +88,8 @@ table { border-collapse: collapse; }
 .header-tel__icon { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; background: var(--c-accent-soft); color: var(--c-accent); flex: none; }
 .header-tel__icon svg { width: 18px; height: 18px; }
 .header-tel__body { display: flex; flex-direction: column; align-items: flex-start; }
-.header-tel__num { font-size: 1.1rem; font-weight: 700; letter-spacing: .04em; color: var(--c-accent); white-space: nowrap; }
-.header-tel__time { font-size: .72rem; color: var(--c-muted); white-space: nowrap; }
+.header-tel__num { font-size: 1.36rem; font-weight: 700; letter-spacing: .04em; line-height: 1.15; margin-right: -.04em; color: var(--c-accent); white-space: nowrap; }
+.header-tel__time { font-size: .72rem; margin-right: -.04em; color: var(--c-muted); white-space: nowrap; }
 .header-tel:hover .header-tel__icon { background: var(--c-accent); color: #fff; }
 
 .nav-toggle { display: none; width: 46px; height: 46px; border: 1px solid var(--c-line); background: #fff; border-radius: 8px; cursor: pointer; padding: 0; position: relative; }
