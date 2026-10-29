@@ -48,6 +48,7 @@
   var DATE_DAYS = 30;            // 日付の一覧に出す日数
   var WEEK = ['日', '月', '火', '水', '木', '金', '土'];
 
+  var openLineEstimate = null; // 下の「LINEで相談」の画面を、見積もりの機種を選んだ状態で開く（機種のポップアップから使う）
   var lineLinks = document.querySelectorAll('a[href^="' + LINE_ADD_URL + '"]');
   if (lineLinks.length && typeof HTMLDialogElement === 'function') {
     var dlg = document.createElement('dialog');
@@ -141,7 +142,12 @@
       var lines = ['【' + t.title + '】'];
       if (t.text) { lines.push(t.text); }
       if (state.topic === TOPIC_ESTIMATE) {
-        for (var k = 0; k < LINE_ESTIMATE.length; k++) { lines.push('■' + LINE_ESTIMATE[k].label + '：' + state[LINE_ESTIMATE[k].key]); }
+        for (var k = 0; k < LINE_ESTIMATE.length; k++) {
+          var val = state[LINE_ESTIMATE[k].key];
+          // ラインナップの機種のポップアップから開いたときは、型式も添える（機種を選び直したときは添えない）
+          if (LINE_ESTIMATE[k].key === 'model' && state.modelPick && state.modelPick.option === val) { val += '（' + state.modelPick.name + '）'; }
+          lines.push('■' + LINE_ESTIMATE[k].label + '：' + val);
+        }
       }
       if (state.topic === TOPIC_KNOW) {
         if (state.faqQ) { lines.push('■知りたいこと：' + state.faqQ); }
@@ -521,6 +527,162 @@
         focusFirst();
       });
     }
+    // 機種のポップアップの「この機種のお見積りをLINEで依頼」：見積もりの画面を、機種を選んだ状態で開く
+    openLineEstimate = function (option, name) {
+      state = { topic: TOPIC_ESTIMATE, model: option, modelPick: { option: option, name: name } };
+      stepIndex = 1;
+      render();
+      dlg.showModal();
+      focusFirst();
+    };
+  }
+
+  // ラインナップ：機種のカードを押すと、その機種のくわしい内容（価格・主な機能・主な仕様・注意書き）をポップアップで表示する。
+  // 機能は「機能比較表」、仕様は「主な仕様」の表の、カードの data-cmp・data-spec 番目（0から数える）の列から作るので、
+  // 表やカードを直せばポップアップの中身も変わる。
+  var productCards = document.querySelectorAll('.product[data-cmp]');
+  if (productCards.length && typeof HTMLDialogElement === 'function') {
+    var pdlg = document.createElement('dialog');
+    pdlg.className = 'line-dialog product-dialog';
+    pdlg.setAttribute('aria-labelledby', 'pd-title');
+    document.body.appendChild(pdlg);
+    var pdCard = null;
+
+    // 表の本体を「行ごとの [見出しのセル, 列ごとのセル…]」にする（横につながったセル colspan は列の数だけ繰り返す）
+    var tableRows = function (sel) {
+      var table = document.querySelector(sel);
+      var rows = [];
+      if (!table || !table.tBodies[0]) { return rows; }
+      var trs = table.tBodies[0].rows;
+      for (var r = 0; r < trs.length; r++) {
+        var cells = [];
+        for (var c = 1; c < trs[r].cells.length; c++) {
+          for (var s = 0; s < (trs[r].cells[c].colSpan || 1); s++) { cells.push(trs[r].cells[c]); }
+        }
+        rows.push({ head: trs[r].cells[0], cells: cells });
+      }
+      return rows;
+    };
+    var plain = function (el) { return el.textContent.replace(/[⁠\s]/g, ''); };
+    // 機能比較表の下の「※1 …　※2 …」を番号ごとに分ける
+    var cmpNotes = {};
+    var cmpNoteEls = document.querySelectorAll('#compare .note p');
+    for (var cn = 0; cn < cmpNoteEls.length; cn++) {
+      var parts = cmpNoteEls[cn].innerHTML.split(/(?=※⁠?\d)/);
+      for (var cp = 0; cp < parts.length; cp++) {
+        var mm = parts[cp].match(/^※⁠?(\d)/);
+        if (mm) { cmpNotes[mm[1]] = parts[cp].replace(/[\s　]+$/, ''); }
+      }
+    }
+    var supNums = function (el, used) {
+      var sups = el.querySelectorAll('sup');
+      for (var i = 0; i < sups.length; i++) { var n = sups[i].textContent.replace(/\D/g, ''); if (n && used.indexOf(n) === -1) { used.push(n); } }
+    };
+    // 仕様の表のうち、ポップアップに出さない行（型式は見出しに出す。都市ガス用の数値は、当店エリアでは使わないので出さない）
+    var SPEC_SKIP = /^(型式|ガス消費量（13A）|ガス消費量（12A）|対応ガス種)/;
+
+    var renderProduct = function (card) {
+      var ci = +card.getAttribute('data-cmp');
+      var si = +card.getAttribute('data-spec');
+      var section = card.closest('section');
+      var grid = card.closest('.product-grid');
+      var typeName = section.querySelector('.section-title') ? plain(section.querySelector('.section-title')) : '';
+      var sub = '';
+      for (var p = grid.previousElementSibling; p; p = p.previousElementSibling) {
+        if (p.matches('h3.sub-title')) { sub = plain(p); break; }
+        if (p.matches('.section-head')) { break; }
+      }
+      var lead = grid.previousElementSibling && grid.previousElementSibling.tagName === 'P' ? grid.previousElementSibling.innerHTML : '';
+      var after = grid.nextElementSibling && grid.nextElementSibling.matches('p.note') ? grid.nextElementSibling.innerHTML : '';
+      var q = function (s) { var el = card.querySelector(s); return el ? el.innerHTML : ''; };
+      var img = card.querySelector('.product__img');
+
+      var used = [];
+      var feats = '';
+      var cr = tableRows('#compare table');
+      for (var r = 0; r < cr.length; r++) {
+        var cell = cr[r].cells[ci];
+        if (!cell) { continue; }
+        supNums(cr[r].head, used); supNums(cell, used);
+        var yes = cell.classList.contains('yes');
+        var no = cell.classList.contains('no');
+        var mark = yes ? '<span class="pd-feat__mark" aria-hidden="true">✓</span>' : no ? '<span class="pd-feat__mark" aria-hidden="true">−</span>' : '<span class="pd-feat__mark" aria-hidden="true">✓</span>';
+        var sups = cell.querySelectorAll('sup');
+        var supHtml = '';
+        for (var u = 0; u < sups.length; u++) { supHtml += sups[u].outerHTML; }
+        feats += '<li class="pd-feat ' + (no ? 'is-no' : 'is-yes') + '">' + mark +
+          '<span class="pd-feat__name">' + cr[r].head.innerHTML + supHtml +
+          (no ? '<span class="sr-only">：非搭載</span>' : yes ? '<span class="sr-only">：搭載</span>' : '：' + cell.textContent) + '</span></li>';
+      }
+      var specs = '';
+      var sr = tableRows('#spec table');
+      for (var r2 = 0; r2 < sr.length; r2++) {
+        if (!sr[r2].cells[si] || SPEC_SKIP.test(plain(sr[r2].head))) { continue; }
+        var head = sr[r2].head.innerHTML.replace('<br>（LPG）', '<br><span class="nw">（プロパンガス）</span>').replace(/<br>(?!<span)/g, '');
+        specs += '<div><dt>' + head + '</dt><dd>' + sr[r2].cells[si].innerHTML + '</dd></div>';
+      }
+      var notes = '';
+      used.sort();
+      for (var nn = 0; nn < used.length; nn++) { if (cmpNotes[used[nn]]) { notes += '<p>' + cmpNotes[used[nn]] + '</p>'; } }
+
+      pdlg.innerHTML =
+        '<div class="line-dialog__body pd">' +
+          '<div class="line-dialog__bar"><button type="button" class="line-dialog__close"><span aria-hidden="true">×</span>閉じる</button></div>' +
+          '<p class="pd__type">' + typeName + (sub ? '<span>' + sub + '</span>' : '') + '</p>' +
+          '<div class="pd__head">' +
+            (img ? '<img class="pd__img" src="' + img.getAttribute('src') + '" alt="' + img.getAttribute('alt') + '" width="' + img.getAttribute('width') + '" height="' + img.getAttribute('height') + '">' : '') +
+            '<div class="pd__info">' +
+              '<p class="product__cap">' + q('.product__cap') + '</p>' +
+              '<h2 class="pd__model" id="pd-title">' + q('.product__model') + '</h2>' +
+              '<p class="product__sub">' + q('.product__sub') + '</p>' +
+              '<ul class="product__tags">' + q('.product__tags') + '</ul>' +
+            '</div>' +
+          '</div>' +
+          (lead ? '<p class="pd__lead">' + lead + '</p>' : '') +
+          '<div class="pd__price"><p class="product__price">' + q('.product__price') + '</p>' + (card.querySelector('.price-deal') ? '<p class="price-deal">' + q('.price-deal') + '</p>' : '') + '</div>' +
+          '<div class="pd__actions"><button type="button" class="btn btn--line" data-pd-estimate>この機種の<wbr>お見積りを<wbr>LINEで依頼</button></div>' +
+          '<h3 class="pd__h">主な機能</h3><ul class="pd-feats">' + feats + '</ul>' +
+          '<h3 class="pd__h">主な仕様</h3><dl class="pd-spec">' + specs + '</dl>' +
+          '<div class="pd__notes">' + (after ? '<p>' + after + '</p>' : '') + notes +
+            '<p>価格は<wbr>メーカー希望小売価格です。<wbr>配送費・据付工事費などは<wbr>含まれません。</p></div>' +
+          '<div class="pd__actions"><button type="button" class="btn btn--line" data-pd-estimate>この機種の<wbr>お見積りを<wbr>LINEで依頼</button>' +
+          '<button type="button" class="btn btn--outline pd__close2" data-pd-close>閉じる</button></div>' +
+        '</div>';
+      pdlg.scrollTop = 0;
+    };
+
+    var openProduct = function (card) {
+      pdCard = card;
+      renderProduct(card);
+      pdlg.showModal();
+      pdlg.querySelector('.line-dialog__close').focus();
+    };
+    var cardClick = function (e) {
+      if (e.target.closest('a')) { return; }
+      // 文字を選んでいるとき（コピーしたいとき）は開かない
+      if (window.getSelection && String(window.getSelection())) { return; }
+      openProduct(this);
+    };
+    for (var pc = 0; pc < productCards.length; pc++) {
+      var more = document.createElement('button');
+      more.type = 'button';
+      more.className = 'product__more';
+      more.innerHTML = 'くわしく見る<span aria-hidden="true">＋</span>';
+      productCards[pc].querySelector('.product__body').appendChild(more);
+      productCards[pc].addEventListener('click', cardClick);
+    }
+    pdlg.addEventListener('click', function (e) {
+      var t = e.target;
+      if (t === pdlg || t.closest('.line-dialog__close') || t.closest('[data-pd-close]')) { pdlg.close(); return; }
+      if (t.closest('[data-pd-estimate]') && pdCard) {
+        var cap = pdCard.querySelector('.product__cap');
+        var section = pdCard.closest('section');
+        var option = (section && section.id === 'deluxe' ? 'デラックス ' : 'スタンダード ') + (cap ? cap.textContent.replace(/\s/g, '') : '');
+        var name = plain(pdCard.querySelector('.product__model'));
+        pdlg.close();
+        if (openLineEstimate) { openLineEstimate(option, name); } else { window.open(LINE_ADD_URL, '_blank', 'noopener'); }
+      }
+    });
   }
 
   // 動き：スクロールで要素をふわっと表示（「動きを減らす」設定の端末では何もしない）

@@ -1058,3 +1058,44 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 .area-table th { width: 6em; font-weight: 700; color: var(--c-accent); }
 .area-table__tel { display: block; margin-top: 4px; font-size: .85rem; color: var(--c-muted); }
 .area-box--single { grid-template-columns: minmax(0, 1fr) !important; }
+/* ラインナップ：機種のカード（押すと、くわしい内容のポップアップが開く） */
+.product[data-cmp] { cursor: pointer; transition: border-color .2s, box-shadow .2s, transform .2s; }
+.product[data-cmp]:hover { border-color: var(--c-accent); box-shadow: 0 6px 18px rgba(20, 35, 55, .12); }
+.product__more { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; min-height: 44px; margin-top: 14px; padding: 6px 12px;
+  border: 1.5px solid var(--c-accent); border-radius: 999px; background: #fff; color: var(--c-accent); font: 700 .92rem/1.4 var(--font); cursor: pointer; }
+.product__more span { font-size: 1.05rem; line-height: 1; }
+.product[data-cmp]:hover .product__more, .product__more:focus-visible { background: var(--c-accent); color: #fff; }
+/* 機種のポップアップ */
+.product-dialog { width: min(94vw, 680px); }
+.pd__type { margin: 0 0 10px; font-size: .8rem; font-weight: 700; letter-spacing: .08em; color: var(--c-accent); padding-right: 96px; }
+.pd__type span { margin-left: .6em; padding: 1px 8px; border-radius: 999px; background: var(--c-bg-soft); font-weight: 500; }
+.pd__head { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; align-items: center; }
+.pd__img { width: 62%; max-width: 260px; margin: 0 auto; }
+.pd__model { margin: 2px 0 4px; font-size: 1.3rem; font-weight: 700; letter-spacing: .04em; }
+.pd__info .product__sub { font-size: .85rem; }
+.pd__lead { margin: 6px 0 0; font-size: .85rem; color: var(--c-muted); line-height: 1.7; }
+.pd__price { margin-top: 12px; }
+.pd__price .product__price { font-size: .85rem; }
+.pd__price .product__price strong { font-size: 1.5rem; }
+.pd__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.pd__actions .btn { flex: 1 1 14em; justify-content: center; }
+.pd__h { margin: 26px 0 10px; padding-left: 10px; border-left: 4px solid var(--c-accent); font-size: 1.05rem; font-weight: 700; }
+.pd-feats { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px 16px; }
+.pd-feat { display: flex; align-items: flex-start; gap: 8px; min-width: 0; font-size: .9rem; line-height: 1.5; }
+.pd-feat__mark { flex: none; display: grid; place-items: center; width: 20px; height: 20px; margin-top: 1px; border-radius: 50%; background: var(--c-line-green); color: #fff; font-size: .72rem; font-weight: 700; }
+.pd-feat.is-no { color: #9aa3ad; }
+.pd-feat.is-no .pd-feat__mark { background: #e3e7ec; color: #9aa3ad; }
+.pd-feat__name { min-width: 0; }
+.pd-spec { margin: 0; border-top: 1px solid var(--c-line); }
+.pd-spec > div { display: grid; grid-template-columns: 7.5em minmax(0, 1fr); gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--c-line); font-size: .86rem; line-height: 1.6; }
+.pd-spec dt { font-weight: 700; color: var(--c-accent); }
+.pd-spec dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.pd__notes { margin-top: 14px; font-size: .78rem; color: var(--c-muted); line-height: 1.7; }
+.pd__notes p { margin: 0 0 4px; }
+@media (min-width: 600px) {
+  .pd__head { grid-template-columns: 42% minmax(0, 1fr); gap: 20px; }
+  .pd__img { width: 100%; }
+  .pd-feats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pd-spec > div { grid-template-columns: 10em minmax(0, 1fr); }
+}
+.pd__info .product__cap { margin: 0; font-size: 1.9rem; }
