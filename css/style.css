@@ -1052,3 +1052,9 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 .line-faq { grid-template-columns: minmax(0, 1fr); }
 .line-faq__item { min-width: 0; }
 .line-faq__a { overflow-wrap: anywhere; }
+/* トップの見出し（h1）の上の小さい1行「岡山県北部の…取扱店」 */
+.hero__title .hero__eyebrow { display: block; font-size: .85rem; font-weight: 400; letter-spacing: .1em; line-height: 1.6; color: var(--c-muted); margin-bottom: .7em; }
+/* 対応エリアのページ：市町村の表（各行の下にお問い合わせ先） */
+.area-table th { width: 6em; font-weight: 700; color: var(--c-accent); }
+.area-table__tel { display: block; margin-top: 4px; font-size: .85rem; color: var(--c-muted); }
+.area-box--single { grid-template-columns: minmax(0, 1fr) !important; }
