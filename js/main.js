@@ -27,8 +27,10 @@
   ];
   // 設置可能エリア（最後の「その他」は、エリア外の方用。市町村名を書いてもらう）
   var LINE_AREAS = ['真庭市', '津山市', '美作市', '苫田郡', '勝田郡', '久米郡', 'その他'];
-  // 「乾太くんについてもっと知りたい」を選んだときの、知りたいことの選択肢（いくつでも選べる）
-  var LINE_QUESTIONS = ['乾燥時間や仕上がり', 'ガス代・電気代', 'うちに設置できるか（場所・工事）', '機種の選び方・価格', 'お手入れの方法', '無料レンタルについて'];
+  // 「乾太くんについてもっと知りたい」を選んだときに出す、よくある質問の一覧と答え。
+  // 各ページの <script type="application/json" id="faq-data"> から読む（tools/sync_faq.py が faq.html から作る）
+  var FAQ = [];
+  try { var faqEl = document.getElementById('faq-data'); if (faqEl) { FAQ = JSON.parse(faqEl.textContent); } } catch (e) { FAQ = []; }
   // 「見積もりを依頼したい」を選んだときに聞くこと（それぞれ1つ選ぶ）
   var LINE_ESTIMATE = [
     { key: 'model', label: 'ご希望の機種', options: ['デラックス 9kg', 'デラックス 6kg', 'スタンダード 8kg', 'スタンダード 5kg', 'スタンダード 3kg', 'まだ決めていない'] },
@@ -122,6 +124,7 @@
       var detailFirst = state.topic === TOPIC_KNOW || state.topic === TOPIC_OTHER;
       var s = ['topic'];
       if (state.topic === TOPIC_ESTIMATE) { s.push('estimate'); }
+      if (state.topic === TOPIC_KNOW && FAQ.length) { s.push('faq'); }
       if (detailFirst) { s.push('detail'); }
       s.push('area', 'method');
       if (state.method === '電話') { s.push('call'); }
@@ -141,7 +144,7 @@
         for (var k = 0; k < LINE_ESTIMATE.length; k++) { lines.push('■' + LINE_ESTIMATE[k].label + '：' + state[LINE_ESTIMATE[k].key]); }
       }
       if (state.topic === TOPIC_KNOW) {
-        if (state.questions && state.questions.length) { lines.push('■知りたいこと：' + state.questions.join('、')); }
+        if (state.faqQ) { lines.push('■知りたいこと：' + state.faqQ); }
         if (state.detail) { lines.push('■ご質問：' + state.detail); }
       } else if (state.topic === TOPIC_OTHER) {
         lines.push('■ご相談内容：' + state.detail);
@@ -242,28 +245,44 @@
             '<p class="line-form__error" role="alert" data-error></p>' +
             '<button type="button" class="btn btn--line line-dialog__next" data-next>' + nextLabel() + '</button></div>';
         }
-        var text = '<label class="line-form__label" for="lf-detail">' +
-          (state.topic === TOPIC_KNOW ? 'ご質問・ご要望<span class="line-form__opt">（自由記入・任意）</span>' : 'ご相談内容') + '</label>' +
-          '<textarea class="line-form__input line-form__textarea" id="lf-detail" rows="4" placeholder="' +
-          (state.topic === TOPIC_KNOW ? '例：洗面所に置けるか知りたいです' : 'ご自由にご記入ください') + '">' + esc(state.detail || '') + '</textarea>';
         if (state.topic === TOPIC_KNOW) {
-          var checks = '<div class="line-checks" role="group" aria-label="知りたいこと">';
-          for (var q = 0; q < LINE_QUESTIONS.length; q++) {
-            var on = state.questions && state.questions.indexOf(LINE_QUESTIONS[q]) !== -1;
-            checks += '<label class="line-check"><input type="checkbox" class="line-check__input" value="' + q + '"' + (on ? ' checked' : '') + '>' +
-                      '<span>' + LINE_QUESTIONS[q] + '</span></label>';
-          }
-          checks += '</div>';
-          return '<h2 class="line-dialog__title" id="line-dialog-title">知りたいことを<wbr>教えてください</h2>' +
-            '<p class="line-dialog__lead">当てはまるものを<wbr>選んでください<wbr>（いくつでも）。<wbr>自由に書いていただいても<wbr>大丈夫です。</p>' +
-            '<div class="line-form">' + checks + text +
+          // よくある質問から選んだ質問があれば表示し、くわしく知りたいことは任意。選んでいなければ質問の入力は必須
+          var picked = state.faqQ;
+          return '<h2 class="line-dialog__title" id="line-dialog-title">' + (picked ? 'くわしく<wbr>知りたいことを<wbr>教えてください' : 'ご質問を<wbr>ご記入ください') + '</h2>' +
+            (picked ? '<p class="line-faq__picked"><span>選んだ質問</span>' + esc(picked) + '</p>' +
+              '<p class="line-dialog__lead">答えで<wbr>わからなかった<wbr>ことなどが<wbr>あれば<wbr>ご記入ください。<wbr>なければ、<wbr>そのまま<wbr>「次へ」で<wbr>大丈夫です。</p>'
+              : '<p class="line-dialog__lead">ご記入いただいた<wbr>ご質問は、<wbr>LINEで<wbr>お送りいただけます。<wbr>担当者から<wbr>お答えします。</p>') +
+            '<div class="line-form">' +
+            '<label class="line-form__label" for="lf-detail">' + (picked ? 'くわしく知りたいこと<span class="line-form__opt">（自由記入・任意）</span>' : 'ご質問') + '</label>' +
+            '<textarea class="line-form__input line-form__textarea" id="lf-detail" rows="4" placeholder="例：洗面所に置けるか知りたいです">' + esc(state.detail || '') + '</textarea>' +
             '<p class="line-form__error" role="alert" data-error></p>' +
             '<button type="button" class="btn btn--line line-dialog__next" data-next>次へ</button></div>';
         }
+        var text = '<label class="line-form__label" for="lf-detail">ご相談内容</label>' +
+          '<textarea class="line-form__input line-form__textarea" id="lf-detail" rows="4" placeholder="ご自由にご記入ください">' + esc(state.detail || '') + '</textarea>';
         return '<h2 class="line-dialog__title" id="line-dialog-title">ご相談内容を<wbr>ご記入ください</h2>' +
           '<div class="line-form">' + text +
           '<p class="line-form__error" role="alert" data-error></p>' +
           '<button type="button" class="btn btn--line line-dialog__next" data-next>次へ</button></div>';
+      },
+      faq: function () {
+        // よくある質問：質問を押すと答えが開く。答えで足りなければ、その質問について LINE で聞ける
+        var h = '';
+        for (var g = 0; g < FAQ.length; g++) {
+          h += '<h3 class="line-faq__group">' + FAQ[g].title + '</h3><div class="line-faq">';
+          for (var i = 0; i < FAQ[g].items.length; i++) {
+            var it = FAQ[g].items[i];
+            h += '<details class="line-faq__item" name="line-faq"><summary>' + it.q + '</summary>' +
+                 '<div class="line-faq__a">' + it.a +
+                 '<button type="button" class="line-faq__ask" data-faq-ask="' + g + '-' + i + '">この質問について<wbr>LINEで聞く ›</button></div></details>';
+          }
+          h += '</div>';
+        }
+        return '<h2 class="line-dialog__title" id="line-dialog-title">知りたいことを<wbr>選んでください</h2>' +
+          '<p class="line-dialog__lead">よくある質問です。<wbr>質問を押すと、<wbr>答えが<wbr>表示されます。</p>' +
+          '<p class="line-faq__skip"><button type="button" data-faq-free>一覧にない<wbr>質問を<wbr>入力する ›</button></p>' + h +
+          '<div class="line-faq__none"><p>知りたいことが<wbr>見つからない<wbr>ときは</p>' +
+          '<button type="button" class="btn btn--line line-dialog__next" data-faq-free>質問を入力して<wbr>LINEで送る</button></div>';
       },
       estimate: function () {
         var groups = '';
@@ -412,12 +431,21 @@
       if (t.closest('[data-rental-other]')) { stepIndex = 0; render(); return; }
       if (t.closest('[data-back]')) { go(-1); return; }
       if (t.closest('[data-send]')) { openLine(); dlg.close(); return; }
+      // よくある質問：「この質問についてLINEで聞く」→ その質問を入れて次へ／「質問を入力してLINEで送る」→ 質問なしで次へ
+      var ask = t.closest('[data-faq-ask]');
+      if (ask) {
+        var gi = ask.getAttribute('data-faq-ask').split('-');
+        var q = FAQ[+gi[0]].items[+gi[1]].q.replace(/<[^>]+>/g, '').replace(/⁠/g, '');
+        if (state.faqQ !== q) { state.detail = ''; }
+        state.faqQ = q; go(1); return;
+      }
+      if (t.closest('[data-faq-free]')) { if (state.faqQ) { state.detail = ''; } state.faqQ = ''; go(1); return; }
       var key = steps()[stepIndex];
       var choice = t.closest('.line-dialog__choice');
       if (choice) {
         var v = +choice.getAttribute('data-value');
         if (key === 'topic') {
-          if (state.topic !== v) { state.detail = ''; state.questions = []; }
+          if (state.topic !== v) { state.detail = ''; state.faqQ = ''; }
           state.topic = v; go(1);
         }
         else if (key === 'area') {
@@ -439,10 +467,7 @@
         }
         else if (key === 'detail') {
           state.detail = dlg.querySelector('#lf-detail').value.trim();
-          state.questions = [];
-          var boxes = dlg.querySelectorAll('.line-check__input:checked');
-          for (var b = 0; b < boxes.length; b++) { state.questions.push(LINE_QUESTIONS[+boxes[b].value]); }
-          if (state.topic === TOPIC_KNOW && !state.questions.length && !state.detail) { showError('知りたいことを選ぶか、ご質問をご記入ください。'); }
+          if (state.topic === TOPIC_KNOW && !state.faqQ && !state.detail) { showError('ご質問をご記入ください。'); }
           else if (state.topic === TOPIC_OTHER && !state.detail) { showError('ご相談内容をご記入ください。'); }
           else { go(1); }
         }

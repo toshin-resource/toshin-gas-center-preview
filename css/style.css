@@ -162,8 +162,7 @@ table { border-collapse: collapse; }
 .hero { position: relative; background: #eceeef; }
 .hero__media img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
 .hero__copy {
-  /* 右上の「お試し無料レンタル中」のバナー（電話番号の下）と重ならないよう、バナーの左に置く */
-  position: absolute; right: calc(max(24px, (100% - var(--container)) / 2) + 140px); top: 8%;
+  position: absolute; right: 4%; top: 8%;
   width: min(44%, 500px);
   background: rgba(255, 255, 255, .9);
   padding: 32px 36px;
@@ -600,8 +599,10 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
 .rental-pop__big { display: block; font-size: 19px; font-weight: 900; line-height: 1.05; letter-spacing: .02em; color: #fee350; }
 .rental-pop:hover, .rental-pop:focus-visible { color: #fff; filter: drop-shadow(0 8px 16px rgba(29, 32, 135, .4)); }
 @media (min-width: 901px) {
-  /* PC：ヘッダーの電話番号のすぐ下に（右端を電話番号の右端にそろえる） */
-  .rental-pop { top: calc(var(--header-h) + 12px); bottom: auto; right: max(24px, calc((100% - var(--container)) / 2)); }
+  /* PC：ヘッダーのトーシンガスのロゴのすぐ下に（左端をロゴの左端にそろえる） */
+  .rental-pop { top: calc(var(--header-h) + 12px); bottom: auto; right: auto; left: max(24px, calc((100% - var(--container)) / 2)); }
+  /* 各ページの上の見出しは、バナーと重ならないようバナーの右から始める */
+  .page-hero .container { max-width: none; padding-left: max(160px, calc((100% - var(--container)) / 2 + 136px)); padding-right: max(24px, calc((100% - var(--container)) / 2)); }
 }
 @media (max-width: 900px) {
   /* スマホ：下の「電話する／LINEで相談」バーの上に */
@@ -964,3 +965,27 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 .line-dialog__terms p + p { margin-top: 4px; }
 .line-dialog__terms strong { display: inline-block; margin-right: 8px; color: var(--c-accent); }
 .line-radios__note { margin: 6px 0 0; font-size: .8rem; font-weight: 700; color: #b3261e; }
+/* LINEで相談：「もっと知りたい」のよくある質問（押すと答えが開く） */
+.line-faq__group { margin: 16px 0 8px; font-size: .85rem; font-weight: 700; color: var(--c-accent); }
+.line-faq__group:first-of-type { margin-top: 0; }
+.line-faq { display: grid; gap: 6px; }
+.line-faq__item { border: 1px solid var(--c-line); border-radius: 10px; background: #fff; }
+.line-faq__item[open] { border-color: var(--c-line-green); }
+.line-faq__item summary { position: relative; display: block; padding: 10px 34px 10px 12px; font-size: .9rem; font-weight: 700; line-height: 1.5; cursor: pointer; list-style: none; }
+.line-faq__item summary::-webkit-details-marker { display: none; }
+.line-faq__item summary::after { content: "＋"; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--c-line-green); font-weight: 700; }
+.line-faq__item[open] summary::after { content: "－"; }
+.line-faq__item summary:hover { background: #f0f8f3; border-radius: 10px; }
+.line-faq__a { padding: 0 12px 12px; font-size: .85rem; line-height: 1.75; color: var(--c-text); }
+.line-faq__a p { margin: 0 0 .5em; }
+.line-faq__a .note { font-size: .75rem; color: var(--c-muted); }
+.line-faq__a ul { margin: 0 0 .5em; padding-left: 1.2em; }
+.line-faq__ask { display: block; width: 100%; margin-top: 8px; padding: 9px 12px; border: 1px solid var(--c-line-green); border-radius: 999px; background: #fff;
+  color: var(--c-line-green-dark); font: inherit; font-size: .85rem; font-weight: 700; cursor: pointer; }
+.line-faq__ask:hover { background: #f0f8f3; }
+.line-faq__none { margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--c-line); text-align: center; }
+.line-faq__none p { margin: 0 0 4px; font-size: .85rem; color: var(--c-muted); }
+.line-faq__picked { margin: 0 0 12px; padding: 10px 12px; border-radius: 10px; background: #f0f8f3; font-size: .9rem; font-weight: 700; line-height: 1.6; }
+.line-faq__picked span { display: block; font-size: .75rem; font-weight: 400; color: var(--c-muted); }
+.line-faq__skip { margin: -8px 0 14px; text-align: right; }
+.line-faq__skip button { padding: 4px 0; border: 0; background: none; color: var(--c-line-green-dark); font: inherit; font-size: .85rem; font-weight: 700; text-decoration: underline; cursor: pointer; }
