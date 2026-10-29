@@ -4,6 +4,7 @@
    色・フォントは :root の変数でまとめて変更できます
    ========================================================= */
 :root {
+  color-scheme: light;        /* ダークモードの端末でも、入力欄などを明るい色で表示 */
   --c-text: #1f2328;
   --c-muted: #586069;
   --c-line: #e2e5e9;
@@ -610,6 +611,38 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
   .rental-pop__small { font-size: 8px; }
   .rental-pop__big { font-size: 17px; }
 }
+/* とーまくん：ふだんは乾燥機の後ろに隠れていて、ときどき体を傾けて横から顔をのぞかせる。
+   PC（バナーは左上）は右から、スマホ（バナーは右下）は左からのぞく */
+.rental-pop__peek { position: absolute; right: 6%; bottom: 6%; width: 82%; height: auto; transform-origin: 50% 100%; pointer-events: none; }
+@media (max-width: 900px) { .rental-pop__peek { right: auto; left: 6%; transform: scaleX(-1); } }
+@media (prefers-reduced-motion: no-preference) {
+  .rental-pop__peek { animation: toma-peek-r 12s ease-in-out 3s infinite; }
+  .intro-on:not(.intro-leaving) .rental-pop__peek { animation-play-state: paused; }
+}
+@media (prefers-reduced-motion: no-preference) and (max-width: 900px) {
+  .rental-pop__peek { animation-name: toma-peek-l; }
+}
+/* 12秒ごと：隠れている → そっと顔を出す → きょろきょろ → 引っ込む */
+@keyframes toma-peek-r {
+  0%, 55% { transform: none; }
+  61% { transform: translateX(14%) rotate(28deg); }
+  65% { transform: translateX(14%) rotate(24deg); }
+  69% { transform: translateX(14%) rotate(29deg); }
+  73% { transform: translateX(14%) rotate(25deg); }
+  76% { transform: translateX(14%) rotate(28deg); }
+  81%, 100% { transform: none; }
+}
+@keyframes toma-peek-l {
+  /* スマホ：絵を左右反転して、PC と同じ見え方で左からのぞく（しっぽは乾燥機の後ろに隠れたまま） */
+  0%, 55% { transform: scaleX(-1); }
+  61% { transform: scaleX(-1) translateX(14%) rotate(28deg); }
+  65% { transform: scaleX(-1) translateX(14%) rotate(24deg); }
+  69% { transform: scaleX(-1) translateX(14%) rotate(29deg); }
+  73% { transform: scaleX(-1) translateX(14%) rotate(25deg); }
+  76% { transform: scaleX(-1) translateX(14%) rotate(28deg); }
+  81%, 100% { transform: scaleX(-1); }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .rental-pop__inner { animation: pop-spin 4s ease-in-out 1s infinite; }
   .rental-pop__dryer { animation: pop-shake 4s linear 1s infinite; }
@@ -638,7 +671,8 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
 .cta .rental-badge { color: #1d2087; font-weight: 900; font-size: .95rem; margin-bottom: 18px; box-shadow: 0 2px 0 rgba(0, 0, 0, .15); }
 
 /* ---------- LINEで相談：相談内容を選ぶ画面 ---------- */
-.line-dialog { width: min(92vw, 440px); max-height: calc(100vh - 32px); padding: 0; border: 0; border-radius: 16px; box-shadow: 0 20px 60px rgba(20, 35, 55, .3); color: var(--c-text); }
+.line-dialog { width: min(92vw, 440px); max-height: calc(100vh - 32px); padding: 0; border: 0; border-radius: 16px; box-shadow: 0 20px 60px rgba(20, 35, 55, .3); color: var(--c-text);
+  background: #fff; color-scheme: light; /* 端末がダークモードでも白い画面で表示（指定しないと背景が黒くなり文字が見にくい） */ }
 .line-dialog::backdrop { background: rgba(20, 30, 45, .55); }
 .line-dialog__body { position: relative; padding: 28px 20px 20px; }
 .line-dialog__close { position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; font-size: 1.5rem; line-height: 1; color: var(--c-muted); cursor: pointer; }
