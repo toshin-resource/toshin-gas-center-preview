@@ -685,27 +685,32 @@
     });
   }
 
-  // 動画：押したときに初めてYouTubeを読み込む（ページを重くしない）
+  // 動画：PCは押したときに初めてYouTubeを読み込んで再生（ページを重くしない）。
+  // スマホは音の出る自動再生ができないため、最初からYouTubeのプレーヤーを置き、その再生ボタンで再生する
+  var ytFrame = function (btn, autoplay) {
+    var f = document.createElement('iframe');
+    f.src = 'https://www.youtube.com/embed/' + btn.getAttribute('data-yt') + '?rel=0&playsinline=1&cc_load_policy=0&enablejsapi=1' + (autoplay ? '&autoplay=1' : '');
+    f.title = btn.getAttribute('data-yt-title') || 'YouTube動画';
+    f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    f.setAttribute('allowfullscreen', '');
+    f.referrerPolicy = 'strict-origin-when-cross-origin';
+    if (!autoplay) { f.loading = 'lazy'; }
+    // 字幕は出さない（音なしで自動再生されたときなど、YouTubeが字幕を自動で出すため、読み込み後に消す）
+    f.addEventListener('load', function () {
+      var n = 0;
+      var t = setInterval(function () {
+        if (!f.contentWindow || ++n > 16) { clearInterval(t); return; }
+        f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'unloadModule', args: ['captions'] }), '*');
+      }, 500);
+    });
+    btn.parentNode.replaceChild(f, btn);
+    return f;
+  };
+  var ytTouch = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
   var ytButtons = document.querySelectorAll('.video__play[data-yt]');
   for (var y = 0; y < ytButtons.length; y++) {
-    ytButtons[y].addEventListener('click', function () {
-      var f = document.createElement('iframe');
-      f.src = 'https://www.youtube-nocookie.com/embed/' + this.getAttribute('data-yt') + '?autoplay=1&rel=0&playsinline=1&cc_load_policy=0&enablejsapi=1';
-      f.title = this.getAttribute('data-yt-title') || 'YouTube動画';
-      f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
-      f.setAttribute('allowfullscreen', '');
-      f.referrerPolicy = 'strict-origin-when-cross-origin';
-      // 字幕は出さない（音なしで自動再生されたときなど、YouTubeが字幕を自動で出すため、読み込み後に消す）
-      f.addEventListener('load', function () {
-        var n = 0;
-        var t = setInterval(function () {
-          if (!f.contentWindow || ++n > 16) { clearInterval(t); return; }
-          f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'unloadModule', args: ['captions'] }), '*');
-        }, 500);
-      });
-      this.parentNode.replaceChild(f, this);
-      f.focus();
-    });
+    if (ytTouch) { ytFrame(ytButtons[y], false); continue; }
+    ytButtons[y].addEventListener('click', function () { ytFrame(this, true).focus(); });
   }
 
   // 動き：スクロールで要素をふわっと表示（「動きを減らす」設定の端末では何もしない）
