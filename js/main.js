@@ -723,42 +723,20 @@
     btn.parentNode.replaceChild(f, btn);
     return f;
   };
-  // スマホ：YouTubeのタイトル・共有・「YouTubeで見る」を隠すため、プレーヤーの上にサムネイルと白い再生ボタンをかぶせる。
-  // かぶせた絵は押せない（タップは下のYouTubeの再生ボタンに届く）。上下の帯はYouTubeのリンクを押さないようにふさぐ。
-  // 再生が始まったら絵を外す。YouTubeから返事が来ないときは、絵を外して普通のプレーヤーに戻す
+  // スマホ：YouTubeのタイトル・共有・「YouTubeで見る」を隠すため、プレーヤーの上にサムネイルと再生ボタンをかぶせる。
+  // ボタンを押したら、すぐに絵を外して再生の命令を送る（「再生が始まった」というYouTubeの返事は待たない。
+  // iPhoneでは返事が届かず、絵が残ったまま音だけ流れることがあったため）。
+  // 端末によって命令で再生が始まらないときは、YouTubeの赤い再生ボタンが見えるので、それを押せば再生できる
   var ytCover = function (btn) {
     var wrap = document.createElement('div');
     wrap.className = 'video__frame';
     btn.parentNode.insertBefore(wrap, btn);
     var f = ytFrame(btn, false);
     wrap.appendChild(f);
-    btn.tabIndex = -1;
-    btn.setAttribute('aria-hidden', 'true');
     wrap.appendChild(btn);
-    var send = function (msg) { if (f.contentWindow) { f.contentWindow.postMessage(JSON.stringify(msg), '*'); } };
-    var done = function () { wrap.classList.add('is-playing'); };
-    ['top', 'bottom'].forEach(function (pos) {
-      var g = document.createElement('span');
-      g.className = 'video__guard video__guard--' + pos;
-      g.setAttribute('aria-hidden', 'true');
-      g.addEventListener('click', function () { send({ event: 'command', func: 'playVideo', args: [] }); });
-      wrap.appendChild(g);
-    });
-    var heard = false;
-    window.addEventListener('message', function (ev) {
-      if (ev.source !== f.contentWindow || typeof ev.data !== 'string') { return; }
-      var d;
-      try { d = JSON.parse(ev.data); } catch (e) { return; }
-      heard = true;
-      var st = d.event === 'onStateChange' ? d.info : (d.info && d.info.playerState);
-      if (st === 1 || st === 3) { done(); }
-    });
-    f.addEventListener('load', function () {
-      var n = 0;
-      var t = setInterval(function () {
-        if (heard || ++n > 12) { clearInterval(t); if (!heard) { done(); } return; }
-        send({ event: 'listening', id: 'yt' + btn.getAttribute('data-yt'), channel: 'widget' });
-      }, 500);
+    btn.addEventListener('click', function () {
+      wrap.classList.add('is-playing');
+      if (f.contentWindow) { f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*'); }
     });
   };
   var ytTouch = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
