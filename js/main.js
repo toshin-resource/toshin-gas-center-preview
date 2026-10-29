@@ -25,14 +25,15 @@
     { label: '乾太くんについて<wbr>もっと知りたい', title: '乾太くんについて知りたい', text: '乾太くんについて、もっと詳しく知りたいです。' },
     { label: 'その他の<wbr>ご相談', title: 'その他のご相談', text: '' }
   ];
-  var LINE_AREAS = ['真庭市', '津山市', 'その他'];
+  // 設置可能エリア（最後の「その他」は、エリア外の方用。市町村名を書いてもらう）
+  var LINE_AREAS = ['真庭市', '津山市', '美作市', '苫田郡', '勝田郡', '久米郡', 'その他'];
   // 「乾太くんについてもっと知りたい」を選んだときの、知りたいことの選択肢（いくつでも選べる）
   var LINE_QUESTIONS = ['乾燥時間や仕上がり', 'ガス代・電気代', 'うちに設置できるか（場所・工事）', '機種の選び方・価格', 'お手入れの方法', '無料レンタルについて'];
   // 「見積もりを依頼したい」を選んだときに聞くこと（それぞれ1つ選ぶ）
   var LINE_ESTIMATE = [
     { key: 'model', label: 'ご希望の機種', options: ['デラックス 9kg', 'デラックス 6kg', 'スタンダード 8kg', 'スタンダード 5kg', 'スタンダード 3kg', 'まだ決めていない'] },
-    { key: 'gas', label: 'ガスの種類', options: ['プロパンガス', '都市ガス', 'わからない'] },
-    { key: 'place', label: '設置場所', options: ['屋内（洗面所など）', '屋外（軒下）', 'まだ決めていない'] }
+    { key: 'gas', label: 'お使いのガス・電気', options: ['プロパンガス', 'オール電化', 'わからない'], note: '※都市ガスのお宅には設置できません' },
+    { key: 'place', label: '設置場所', options: ['屋内（洗面所など）', '屋外（軒下など）', 'まだ決めていない'], note: '※屋外は、雨が直接かからない場所に限ります' }
   ];
   var TOPIC_ESTIMATE = 2;        // LINE_TOPICS の「見積もりを依頼したい」の番号（0から数える）
   var TOPIC_KNOW = 3;            // LINE_TOPICS の「もっと知りたい」の番号
@@ -206,8 +207,8 @@
         }
       });
     };
-    var choiceList = function (items, current) {
-      var h = '<ul class="line-dialog__list">';
+    var choiceList = function (items, current, extraClass) {
+      var h = '<ul class="line-dialog__list' + (extraClass ? ' ' + extraClass : '') + '">';
       for (var i = 0; i < items.length; i++) {
         h += '<li><button type="button" class="line-dialog__choice' + (current === i ? ' is-selected' : '') + '" data-value="' + i + '">' +
              '<span class="line-dialog__num">' + (i + 1) + '</span><span class="line-dialog__label">' + items[i] + '</span>' +
@@ -273,7 +274,7 @@
             groups += '<label class="line-check line-radio"><input type="radio" class="line-check__input" name="lf-' + item.key + '" value="' + o + '"' +
                       (state[item.key] === item.options[o] ? ' checked' : '') + '><span>' + item.options[o].replace('（', '<wbr>（').replace('まだ決めて', 'まだ<wbr>決めて') + '</span></label>';
           }
-          groups += '</div></fieldset>';
+          groups += '</div>' + (item.note ? '<p class="line-radios__note">' + item.note + '</p>' : '') + '</fieldset>';
         }
         return '<h2 class="line-dialog__title" id="line-dialog-title">お見積りの<wbr>内容を<wbr>選んでください</h2>' +
           '<p class="line-dialog__lead">わかる範囲で<wbr>お選びください。<wbr>現地確認・お見積りは<wbr>無料です。</p>' +
@@ -284,10 +285,13 @@
       area: function () {
         var other = state.area === 'その他';
         return '<h2 class="line-dialog__title" id="line-dialog-title">お住まいの地域を<wbr>選んでください</h2>' +
-          choiceList(LINE_AREAS, LINE_AREAS.indexOf(state.area)) +
+          '<div class="line-dialog__terms"><p><strong>設置可能エリア</strong>岡山県 真庭市・<wbr>津山市・<wbr>美作市・<wbr>苫田郡・<wbr>勝田郡・<wbr>久米郡</p>' +
+          '<p><strong>設置条件</strong>戸建て・<wbr>オール電化・<wbr>プロパンガスなどを<wbr>お使いの<wbr>お客様<wbr>（都市ガス不可）。<wbr>屋外は<wbr>雨が<wbr>直接<wbr>かからない<wbr>場所</p></div>' +
+          choiceList(LINE_AREAS.map(function (a) { return a === 'その他' ? 'その他の<wbr>地域' : a; }), LINE_AREAS.indexOf(state.area), 'line-dialog__list--grid') +
           '<div class="line-form" ' + (other ? '' : 'hidden') + ' data-other>' +
+          '<p class="line-radios__note">エリア外の<wbr>場合、<wbr>設置を<wbr>お受け<wbr>できない<wbr>ことが<wbr>あります。</p>' +
           '<label class="line-form__label" for="lf-area">市町村名<span class="line-form__opt">（任意）</span></label>' +
-          '<input class="line-form__input" id="lf-area" type="text" autocomplete="address-level2" placeholder="例：美作市" value="' + esc(state.areaOther || '') + '">' +
+          '<input class="line-form__input" id="lf-area" type="text" autocomplete="address-level2" placeholder="例：岡山市" value="' + esc(state.areaOther || '') + '">' +
           '<button type="button" class="btn btn--line line-dialog__next" data-next>次へ</button></div>';
       },
       method: function () {
@@ -299,7 +303,7 @@
         return '<h2 class="line-dialog__title" id="line-dialog-title">お電話の<wbr>ご希望を<wbr>教えてください</h2>' +
           '<p class="line-dialog__lead">明日以降の<wbr>平日・土曜日、<wbr><span class="nw">9:00〜17:00</span>の間で<wbr>お選びください。<wbr>日曜日・祝日は<wbr>お休みです。</p>' +
           '<p class="line-dialog__urgent">本日中の<wbr>ご連絡を<wbr>希望の方・<wbr>お急ぎの方は、<wbr>お電話ください。<br>' +
-          '<a href="tel:0867445552">真庭 <span class="nw">0867-44-5552</span></a><a href="tel:0868201653">津山支店 <span class="nw">0868-20-1653</span></a></p>' +
+          '<a href="tel:0867445552">真庭地域の方 <span class="nw">0867-44-5552</span></a><a href="tel:0868201653">津山地域の方 <span class="nw">0868-20-1653</span></a></p>' +
           '<div class="line-form">' +
           '<label class="line-form__label" for="lf-date">ご希望の日</label>' +
           '<select class="line-form__input" id="lf-date">' + dateOptions(state.date) + '</select>' +
