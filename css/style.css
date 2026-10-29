@@ -1142,3 +1142,13 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 .video__title { margin: 0 0 12px; text-align: center; font-weight: 700; color: var(--c-accent); }
 @media (max-width: 600px) { .video__icon { width: 64px; height: 64px; margin: -32px 0 0 -32px; } .video__icon::after { left: 26px; top: 20px; border-width: 12px 0 12px 19px; } }
 .video iframe:focus { outline: none; }
+/* スマホ：YouTubeのプレーヤーの上にサムネイルと白い再生ボタンをかぶせる（js/main.js） */
+.video__frame { position: relative; border-radius: var(--radius); overflow: hidden; box-shadow: 0 12px 40px rgba(0, 0, 0, .35); }
+.video--inline .video__frame { box-shadow: var(--shadow); }
+.video__frame iframe { box-shadow: none; border-radius: 0; }
+.video__frame .video__play { position: absolute; inset: 0; height: 100%; aspect-ratio: auto; border-radius: 0; box-shadow: none; pointer-events: none; }
+.video__frame .video__play img { opacity: 1; }
+.video__guard { position: absolute; left: 0; right: 0; }
+.video__guard--top { top: 0; height: 26%; }
+.video__guard--bottom { bottom: 0; height: 28%; }
+.video__frame.is-playing .video__play, .video__frame.is-playing .video__guard { display: none; }

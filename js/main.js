@@ -706,10 +706,48 @@
     btn.parentNode.replaceChild(f, btn);
     return f;
   };
+  // スマホ：YouTubeのタイトル・共有・「YouTubeで見る」を隠すため、プレーヤーの上にサムネイルと白い再生ボタンをかぶせる。
+  // かぶせた絵は押せない（タップは下のYouTubeの再生ボタンに届く）。上下の帯はYouTubeのリンクを押さないようにふさぐ。
+  // 再生が始まったら絵を外す。YouTubeから返事が来ないときは、絵を外して普通のプレーヤーに戻す
+  var ytCover = function (btn) {
+    var wrap = document.createElement('div');
+    wrap.className = 'video__frame';
+    btn.parentNode.insertBefore(wrap, btn);
+    var f = ytFrame(btn, false);
+    wrap.appendChild(f);
+    btn.tabIndex = -1;
+    btn.setAttribute('aria-hidden', 'true');
+    wrap.appendChild(btn);
+    var send = function (msg) { if (f.contentWindow) { f.contentWindow.postMessage(JSON.stringify(msg), '*'); } };
+    var done = function () { wrap.classList.add('is-playing'); };
+    ['top', 'bottom'].forEach(function (pos) {
+      var g = document.createElement('span');
+      g.className = 'video__guard video__guard--' + pos;
+      g.setAttribute('aria-hidden', 'true');
+      g.addEventListener('click', function () { send({ event: 'command', func: 'playVideo', args: [] }); });
+      wrap.appendChild(g);
+    });
+    var heard = false;
+    window.addEventListener('message', function (ev) {
+      if (ev.source !== f.contentWindow || typeof ev.data !== 'string') { return; }
+      var d;
+      try { d = JSON.parse(ev.data); } catch (e) { return; }
+      heard = true;
+      var st = d.event === 'onStateChange' ? d.info : (d.info && d.info.playerState);
+      if (st === 1 || st === 3) { done(); }
+    });
+    f.addEventListener('load', function () {
+      var n = 0;
+      var t = setInterval(function () {
+        if (heard || ++n > 12) { clearInterval(t); if (!heard) { done(); } return; }
+        send({ event: 'listening', id: 'yt' + btn.getAttribute('data-yt'), channel: 'widget' });
+      }, 500);
+    });
+  };
   var ytTouch = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
   var ytButtons = document.querySelectorAll('.video__play[data-yt]');
   for (var y = 0; y < ytButtons.length; y++) {
-    if (ytTouch) { ytFrame(ytButtons[y], false); continue; }
+    if (ytTouch) { ytCover(ytButtons[y]); continue; }
     ytButtons[y].addEventListener('click', function () { ytFrame(this, true).focus(); });
   }
 
