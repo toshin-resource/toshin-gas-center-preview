@@ -373,7 +373,7 @@
     var renderRentalAsk = function () {
       dlg.classList.remove('is-wide');
       dlg.innerHTML = '<div class="line-dialog__body">' +
-        '<button type="button" class="line-dialog__close" aria-label="閉じる">×</button>' +
+        '<div class="line-dialog__bar"><button type="button" class="line-dialog__close"><span aria-hidden="true">×</span>閉じる</button></div>' +
         '<p class="line-dialog__eyebrow">お試し無料レンタル</p>' +
         '<h2 class="line-dialog__title" id="line-dialog-title">乾太くんの<wbr>お試し<wbr>無料レンタルを<wbr>ご希望ですか？</h2>' +
         '<p class="line-dialog__lead">いくつかの質問に<wbr>お答えいただくと、<wbr>LINEで<wbr>ご相談いただけます。</p>' +
@@ -391,7 +391,7 @@
       var key = list[stepIndex];
       var progress = key === 'confirm' ? '確認' : (stepIndex + 1) + ' / ' + (list.length - 1);
       dlg.innerHTML = '<div class="line-dialog__body">' +
-        '<button type="button" class="line-dialog__close" aria-label="閉じる">×</button>' +
+        '<div class="line-dialog__bar"><button type="button" class="line-dialog__close"><span aria-hidden="true">×</span>閉じる</button></div>' +
         '<p class="line-dialog__eyebrow">LINEで相談<span class="line-dialog__step">' + progress + '</span></p>' +
         screens[key]() +
         (stepIndex > 0 ? '<button type="button" class="line-dialog__back" data-back>‹ 戻る</button>' : '') +

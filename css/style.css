@@ -677,10 +677,15 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
   background: #fff; color-scheme: light; /* 端末がダークモードでも白い画面で表示（指定しないと背景が黒くなり文字が見にくい） */ }
 .line-dialog::backdrop { background: rgba(20, 30, 45, .55); }
 .line-dialog__body { position: relative; padding: 28px 20px 20px; }
-.line-dialog__close { position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; font-size: 1.5rem; line-height: 1; color: var(--c-muted); cursor: pointer; }
-.line-dialog__close:hover { background: var(--c-bg-soft); color: var(--c-text); }
+/* 閉じるボタン：下へスクロールしても右上に残る（高さ0の帯を上に貼り付け、その中に置く） */
+.line-dialog__bar { position: sticky; top: 28px; z-index: 5; height: 0; }
+.line-dialog__close { position: absolute; top: -18px; right: -10px; display: inline-flex; align-items: center; gap: 4px; min-height: 40px; padding: 0 14px 0 10px;
+  border: 1px solid #c9ced5; border-radius: 999px; background: #fff; box-shadow: 0 2px 8px rgba(20, 35, 55, .18);
+  font: inherit; font-size: .85rem; font-weight: 700; color: var(--c-text); cursor: pointer; }
+.line-dialog__close span { font-size: 1.3rem; line-height: 1; font-weight: 400; }
+.line-dialog__close:hover { background: var(--c-bg-soft); }
 .line-dialog__eyebrow { margin: 0 0 4px; font-size: .78rem; font-weight: 700; letter-spacing: .15em; color: var(--c-line-green); }
-.line-dialog__title { margin: 0 44px 8px 0; font-size: 1.25rem; font-weight: 700; }
+.line-dialog__title { margin: 0 0 8px 0; font-size: 1.25rem; font-weight: 700; }
 .line-dialog__lead { margin: 0 0 16px; font-size: .88rem; color: var(--c-muted); line-height: 1.7; }
 .line-dialog__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .line-dialog__choice {
@@ -737,7 +742,7 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
 .line-form__input:focus { outline: 3px solid #b86200; outline-offset: 1px; border-color: transparent; }
 /* iPhone でも入力欄が枠からはみ出さないように */
 .line-form > *, .line-form__time > * { min-width: 0; max-width: 100%; }
-.line-dialog__body { overflow-x: hidden; }
+.line-dialog__body { overflow-x: clip; } /* hidden だと閉じるボタンが上に残らない（sticky が効かない）ため clip */
 .line-form__textarea { min-height: 110px; resize: vertical; line-height: 1.6; }
 .line-checks { display: grid; gap: 8px; margin-bottom: 4px; }
 .line-check {
@@ -1043,3 +1048,7 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 .faq-group[id^="faq-"] .faq summary::before { color: var(--g); }
 .chip-nav a[href^="#faq-"] { border-color: var(--g-bar); background: var(--g-bg); color: var(--g); font-weight: 700; }
 .chip-nav a[href^="#faq-"]:hover { border-color: var(--g); color: var(--g); }
+/* よくある質問の答え：長い型番などがあっても枠からはみ出さないよう、必要なら途中で折り返す */
+.line-faq { grid-template-columns: minmax(0, 1fr); }
+.line-faq__item { min-width: 0; }
+.line-faq__a { overflow-wrap: anywhere; }
