@@ -1026,3 +1026,20 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 .line-faq__picked span { display: block; font-size: .75rem; font-weight: 400; color: var(--c-muted); }
 .line-faq__skip { margin: -8px 0 14px; text-align: right; }
 .line-faq__skip button { padding: 4px 0; border: 0; background: none; color: var(--c-line-green-dark); font: inherit; font-size: .85rem; font-weight: 700; text-decoration: underline; cursor: pointer; }
+/* よくある質問のグループの色分け（LINE相談の一覧と、よくある質問のページで共通。トーシンガスのロゴの色から）
+   --g：文字の色／--g-bar：線の色／--g-bg：見出しの背景 */
+.line-faq--c0, #faq-product, .chip-nav a[href="#faq-product"] { --g: #2f5d9e; --g-bar: #87aad9; --g-bg: #eaf1fb; } /* 製品について：青 */
+.line-faq--c1, #faq-install, .chip-nav a[href="#faq-install"] { --g: #2e7d4a; --g-bar: #87c796; --g-bg: #eaf6ee; } /* 設置について：緑 */
+.line-faq--c2, #faq-use, .chip-nav a[href="#faq-use"] { --g: #a8501d; --g-bar: #f19975; --g-bg: #fdf0ea; } /* 使い方・お手入れ：オレンジ */
+.line-faq--c3, #faq-order, .chip-nav a[href="#faq-order"] { --g: #a8336b; --g-bar: #f09dc1; --g-bg: #fcedf4; } /* ご依頼・お見積り：ピンク */
+.line-faq__group[class*="line-faq--c"] { margin: 22px 0 8px; padding: 7px 12px; border-left: 5px solid var(--g-bar); border-radius: 8px; background: var(--g-bg); color: var(--g); font-size: .92rem; }
+.line-faq__group[class*="line-faq--c"]:first-of-type { margin-top: 0; }
+.line-faq[class*="line-faq--c"] .line-faq__item { border-left: 4px solid var(--g-bar); }
+.line-faq[class*="line-faq--c"] .line-faq__item[open] { border-color: var(--g-bar); }
+.line-faq[class*="line-faq--c"] .line-faq__item summary::after { color: var(--g); }
+.line-faq[class*="line-faq--c"] .line-faq__item summary:hover { background: var(--g-bg); }
+.faq-group[id^="faq-"] h2 { padding: 8px 14px; border-left: 6px solid var(--g-bar); border-radius: 8px; background: var(--g-bg); color: var(--g); }
+.faq-group[id^="faq-"] .faq { border-left: 4px solid var(--g-bar); }
+.faq-group[id^="faq-"] .faq summary::before { color: var(--g); }
+.chip-nav a[href^="#faq-"] { border-color: var(--g-bar); background: var(--g-bg); color: var(--g); font-weight: 700; }
+.chip-nav a[href^="#faq-"]:hover { border-color: var(--g); color: var(--g); }

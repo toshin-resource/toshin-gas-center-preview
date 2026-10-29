@@ -269,7 +269,9 @@
         // よくある質問：質問を押すと答えが開く。答えで足りなければ、その質問について LINE で聞ける
         var h = '';
         for (var g = 0; g < FAQ.length; g++) {
-          h += '<h3 class="line-faq__group">' + FAQ[g].title + '</h3><div class="line-faq">';
+          // グループごとに色を変える（製品＝青・設置＝緑・使い方＝オレンジ・ご依頼＝ピンク。CSS の line-faq--c0〜c3）
+          var tone = ' line-faq--c' + (g % 4);
+          h += '<h3 class="line-faq__group' + tone + '">' + FAQ[g].title + '</h3><div class="line-faq' + tone + '">';
           for (var i = 0; i < FAQ[g].items.length; i++) {
             var it = FAQ[g].items[i];
             h += '<details class="line-faq__item" name="line-faq"><summary>' + it.q + '</summary>' +
