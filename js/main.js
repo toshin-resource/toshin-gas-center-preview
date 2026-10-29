@@ -724,9 +724,11 @@
     return f;
   };
   // スマホ：YouTubeのタイトル・共有・「YouTubeで見る」を隠すため、プレーヤーの上にサムネイルと再生ボタンをかぶせる。
-  // ボタンを押したら、すぐに絵を外して再生の命令を送る（「再生が始まった」というYouTubeの返事は待たない。
-  // iPhoneでは返事が届かず、絵が残ったまま音だけ流れることがあったため）。
-  // 端末によって命令で再生が始まらないときは、YouTubeの赤い再生ボタンが見えるので、それを押せば再生できる
+  // ボタンを押したら、すぐに絵を外す。
+  // ・Androidなど：YouTubeに再生の命令を送り、そのまま再生する
+  // ・iPhone・iPad：ページからの再生の命令を受け付けず、プレーヤーが止まったままになるため、命令は送らない。
+  //   絵を外すとYouTubeの赤い再生ボタンが出るので、それを押して再生する（iPhoneが確実に再生できるのはこの押し方）
+  var ytIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   var ytCover = function (btn) {
     var wrap = document.createElement('div');
     wrap.className = 'video__frame';
@@ -736,7 +738,7 @@
     wrap.appendChild(btn);
     btn.addEventListener('click', function () {
       wrap.classList.add('is-playing');
-      if (f.contentWindow) { f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*'); }
+      if (!ytIOS && f.contentWindow) { f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*'); }
     });
   };
   var ytTouch = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
