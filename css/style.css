@@ -1122,5 +1122,10 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 .video__icon::after { content: ""; position: absolute; left: 31px; top: 24px; border-style: solid; border-width: 14px 0 14px 22px; border-color: transparent transparent transparent var(--c-accent); }
 .video__play:hover .video__icon, .video__play:focus-visible .video__icon { transform: scale(1.08); }
 .video__play:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
-.video__note { margin: 14px 0 0; text-align: center; font-size: .8rem; color: #9fb6cf; }
+.video__note { margin: 12px 0 0; text-align: center; font-size: .8rem; color: var(--c-muted); }
+.section--movie .video__note { color: #9fb6cf; }
+.video--inline { max-width: 760px; margin: 0 auto 48px; }
+.video--inline .video__play { box-shadow: var(--shadow); }
+.video__title { margin: 0 0 12px; text-align: center; font-weight: 700; color: var(--c-accent); }
 @media (max-width: 600px) { .video__icon { width: 64px; height: 64px; margin: -32px 0 0 -32px; } .video__icon::after { left: 26px; top: 20px; border-width: 12px 0 12px 19px; } }
+.video iframe:focus { outline: none; }
