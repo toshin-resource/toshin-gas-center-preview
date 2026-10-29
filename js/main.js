@@ -432,12 +432,14 @@
     };
 
     // 選んだ項目を3回点滅させる
-    dlg.addEventListener('change', function (e) {
-      var box = e.target.checked && e.target.closest('.line-check');
+    var blink = function (box) {
       if (!box) { return; }
       box.classList.remove('is-blink');
       void box.offsetWidth;
       box.classList.add('is-blink');
+    };
+    dlg.addEventListener('change', function (e) {
+      if (e.target.checked) { blink(e.target.closest('.line-check')); }
     });
     dlg.addEventListener('animationend', function (e) {
       if (e.animationName === 'line-blink') { e.target.classList.remove('is-blink'); }
@@ -546,6 +548,9 @@
       render();
       dlg.showModal();
       focusFirst();
+      // 選んだ状態の機種を3回点滅させて、どれが選ばれているか分かるようにする
+      var picked = dlg.querySelector('input[name="lf-model"]:checked');
+      if (picked) { picked.scrollIntoView({ block: 'nearest' }); setTimeout(function () { blink(picked.closest('.line-check')); }, 250); }
     };
   }
 
