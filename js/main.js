@@ -685,6 +685,21 @@
     });
   }
 
+  // 動画：押したときに初めてYouTubeを読み込む（ページを重くしない）
+  var ytButtons = document.querySelectorAll('.video__play[data-yt]');
+  for (var y = 0; y < ytButtons.length; y++) {
+    ytButtons[y].addEventListener('click', function () {
+      var f = document.createElement('iframe');
+      f.src = 'https://www.youtube-nocookie.com/embed/' + this.getAttribute('data-yt') + '?autoplay=1&rel=0&playsinline=1';
+      f.title = this.getAttribute('data-yt-title') || 'YouTube動画';
+      f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+      f.setAttribute('allowfullscreen', '');
+      f.referrerPolicy = 'strict-origin-when-cross-origin';
+      this.parentNode.replaceChild(f, this);
+      f.focus();
+    });
+  }
+
   // 動き：スクロールで要素をふわっと表示（「動きを減らす」設定の端末では何もしない）
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!reduceMotion && 'IntersectionObserver' in window) {
