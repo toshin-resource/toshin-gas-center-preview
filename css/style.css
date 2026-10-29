@@ -1099,3 +1099,12 @@ html.intro-on, html.intro-on body { overflow: hidden; }
   .pd-spec > div { grid-template-columns: 10em minmax(0, 1fr); }
 }
 .pd__info .product__cap { margin: 0; font-size: 1.9rem; }
+
+/* 対応エリアの地図 */
+.area-map { max-width: 520px; margin: 0 auto 40px; text-align: center; }
+.area-map img { display: block; width: 100%; height: auto; }
+.area-map figcaption { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 20px; margin-top: 12px; font-size: .9rem; color: var(--c-text); }
+.area-map__legend { display: inline-flex; align-items: center; gap: 8px; }
+.area-map__key { width: 16px; height: 16px; border-radius: 3px; background: #dfe3e8; }
+.area-map__key--on { background: var(--c-accent); }
+.area-map__credit { flex-basis: 100%; font-size: .72rem; color: var(--c-muted); }
