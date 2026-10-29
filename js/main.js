@@ -431,6 +431,18 @@
       return '';
     };
 
+    // 選んだ項目を3回点滅させる
+    dlg.addEventListener('change', function (e) {
+      var box = e.target.checked && e.target.closest('.line-check');
+      if (!box) { return; }
+      box.classList.remove('is-blink');
+      void box.offsetWidth;
+      box.classList.add('is-blink');
+    });
+    dlg.addEventListener('animationend', function (e) {
+      if (e.animationName === 'line-blink') { e.target.classList.remove('is-blink'); }
+    });
+
     dlg.addEventListener('click', function (e) {
       var t = e.target;
       if (t === dlg || t.closest('.line-dialog__close')) { dlg.close(); return; }

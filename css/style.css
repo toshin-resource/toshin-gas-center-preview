@@ -765,6 +765,11 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
 }
 .line-check:has(input:checked) { border-color: var(--c-line-green); background: #f0f8f3; }
 .line-check__input { flex: none; width: 22px; height: 22px; margin: 0; accent-color: var(--c-line-green); }
+/* 選択肢の丸に四角い枠（フォーカスの線）は出さない。選んだ項目は3回点滅させる（js/main.js） */
+.line-check__input:focus, .line-check__input:focus-visible { outline: none; }
+.line-check.is-blink { animation: line-blink .3s ease-in-out 3; }
+@keyframes line-blink { 50% { background: #c6e8d2; border-color: var(--c-line-green); opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .line-check.is-blink { animation: none; } }
 /* 見積もり依頼：機種・ガスの種類・設置場所（それぞれ1つ選ぶ） */
 .line-radios { min-width: 0; margin: 0; padding: 0; border: 0; }
 .line-radios .line-form__label { display: block; margin: 8px 0 6px; padding: 0; }
@@ -1131,8 +1136,11 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 .video__play { padding: 0; cursor: pointer; }
 .video__play img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease, opacity .3s; opacity: .92; }
 .video__play:hover img, .video__play:focus-visible img { transform: scale(1.03); opacity: 1; }
-.video__icon { position: absolute; left: 50%; top: 50%; width: 76px; height: 76px; margin: -38px 0 0 -38px; border-radius: 50%; background: rgba(255, 255, 255, .92); box-shadow: 0 6px 20px rgba(0, 0, 0, .3); transition: transform .2s; }
-.video__icon::after { content: ""; position: absolute; left: 31px; top: 24px; border-style: solid; border-width: 14px 0 14px 22px; border-color: transparent transparent transparent var(--c-accent); }
+/* 再生ボタン：写真の白い部分（乾太くんの扉など）にまぎれないよう、紺の丸に白い三角と白いふち */
+.video__play::before { content: ""; position: absolute; inset: 0; z-index: 1; background: rgba(15, 30, 50, .22); pointer-events: none; }
+.video__icon { position: absolute; z-index: 2; left: 50%; top: 50%; width: 76px; height: 76px; margin: -38px 0 0 -38px; border-radius: 50%; border: 4px solid #fff; background: var(--c-accent); box-shadow: 0 0 0 6px rgba(255, 255, 255, .45), 0 8px 24px rgba(0, 0, 0, .45); transition: transform .2s; }
+.video__icon::before { content: "動画を再生"; position: absolute; left: 50%; top: calc(100% + 16px); transform: translateX(-50%); white-space: nowrap; padding: 5px 14px; border-radius: 999px; background: var(--c-accent); color: #fff; font-size: .82rem; font-weight: 700; letter-spacing: .06em; line-height: 1.4; box-shadow: 0 4px 14px rgba(0, 0, 0, .35); }
+.video__icon::after { content: ""; position: absolute; left: 27px; top: 20px; border-style: solid; border-width: 14px 0 14px 22px; border-color: transparent transparent transparent #fff; }
 .video__play:hover .video__icon, .video__play:focus-visible .video__icon { transform: scale(1.08); }
 .video__play:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 .video__note { margin: 12px 0 0; text-align: center; font-size: .8rem; color: var(--c-muted); }
@@ -1140,7 +1148,8 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 .video--inline { max-width: 760px; margin: 0 auto 48px; }
 .video--inline .video__play { box-shadow: var(--shadow); }
 .video__title { margin: 0 0 12px; text-align: center; font-weight: 700; color: var(--c-accent); }
-@media (max-width: 600px) { .video__icon { width: 64px; height: 64px; margin: -32px 0 0 -32px; } .video__icon::after { left: 26px; top: 20px; border-width: 12px 0 12px 19px; } }
+/* スマホ：丸と「動画を再生」をひとかたまりで中央に（上下の帯にかからないように） */
+@media (max-width: 600px) { .video__icon { width: 56px; height: 56px; margin: -42px 0 0 -28px; } .video__icon::after { left: 18px; top: 13px; border-width: 11px 0 11px 17px; } .video__icon::before { top: calc(100% + 6px); font-size: .72rem; padding: 3px 10px; box-shadow: 0 3px 10px rgba(0, 0, 0, .35); } }
 .video iframe:focus { outline: none; }
 /* スマホ：YouTubeのプレーヤーの上にサムネイルと白い再生ボタンをかぶせる（js/main.js） */
 .video__frame { position: relative; border-radius: var(--radius); overflow: hidden; box-shadow: 0 12px 40px rgba(0, 0, 0, .35); }
@@ -1149,6 +1158,6 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 .video__frame .video__play { position: absolute; inset: 0; height: 100%; aspect-ratio: auto; border-radius: 0; box-shadow: none; pointer-events: none; }
 .video__frame .video__play img { opacity: 1; }
 .video__guard { position: absolute; left: 0; right: 0; }
-.video__guard--top { top: 0; height: 26%; }
-.video__guard--bottom { bottom: 0; height: 28%; }
+.video__guard--top { top: 0; height: 24%; }
+.video__guard--bottom { bottom: 0; height: 25%; }
 .video__frame.is-playing .video__play, .video__frame.is-playing .video__guard { display: none; }
