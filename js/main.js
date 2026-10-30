@@ -2,6 +2,19 @@
 (function () {
   'use strict';
 
+  // ページを開いたときは、いちばん上から表示する。
+  // （関係者限定プレビューは、パスワードの画面のあとにページを書き出すため、ブラウザによっては途中の位置から表示されることがある）
+  // ページ内リンク（#…）で来たとき・「戻る」や再読み込みのとき・読み込み中にお客さまがスクロールしたときは何もしない
+  var navEntry = window.performance && performance.getEntriesByType ? performance.getEntriesByType('navigation')[0] : null;
+  if (!location.hash && (!navEntry || navEntry.type === 'navigate')) {
+    var userScrolled = false;
+    var markScrolled = function () { userScrolled = true; };
+    ['wheel', 'touchmove', 'keydown'].forEach(function (ev) { window.addEventListener(ev, markScrolled, { once: true, passive: true }); });
+    var toTop = function () { if (!userScrolled && window.scrollY !== 0) { window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); } };
+    toTop();
+    window.addEventListener('load', function () { toTop(); setTimeout(toTop, 0); }, { once: true });
+  }
+
   // 現在のページのナビにマーク（ヘッダーを全ページ同一HTMLにするため）
   var file = location.pathname.split('/').pop() || 'index.html';
   if (file.indexOf('.html') === -1) { file = 'index.html'; }
