@@ -47,7 +47,7 @@
   // 「見積もりを依頼したい」を選んだときに聞くこと（それぞれ1つ選ぶ）
   var LINE_ESTIMATE = [
     { key: 'model', label: 'ご希望の機種', options: ['デラックス 9kg', 'デラックス 6kg', 'スタンダード 8kg', 'スタンダード 5kg', 'スタンダード 3kg', 'まだ決めていない'] },
-    { key: 'gas', label: 'お使いのガス・電気', options: ['プロパンガス', 'オール電化', 'わからない'], note: '※都市ガスのお宅には設置できません' },
+    { key: 'gas', label: 'お使いのガス・電気', options: ['プロパンガス', 'オール電化', 'わからない'], note: '※都市ガスのお宅は、当社では承っていません' },
     { key: 'place', label: '設置場所', options: ['屋内（洗面所など）', '屋外（軒下など）', 'まだ決めていない'], note: '※屋外は、雨が直接かからない場所に限ります' }
   ];
   var TOPIC_ESTIMATE = 2;        // LINE_TOPICS の「見積もりを依頼したい」の番号（0から数える）
@@ -326,7 +326,7 @@
         var other = state.area === 'その他';
         return '<h2 class="line-dialog__title" id="line-dialog-title">お住まいの地域を<wbr>選んでください</h2>' +
           '<div class="line-dialog__terms"><p><strong>設置可能エリア</strong>岡山県 真庭市・<wbr>津山市・<wbr>美作市・<wbr>苫田郡・<wbr>勝田郡・<wbr>久米郡</p>' +
-          '<p><strong>設置条件</strong>戸建て・<wbr>オール電化・<wbr>プロパンガスなどを<wbr>お使いの<wbr>お客様<wbr>（都市ガス不可）。<wbr>屋外は<wbr>雨が<wbr>直接<wbr>かからない<wbr>場所</p></div>' +
+          '<p><strong>設置条件</strong>戸建て・<wbr>オール電化・<wbr>プロパンガスなどを<wbr>お使いの<wbr>お客様<wbr>（都市ガスの<wbr>お宅は<wbr>当社では<wbr>対象外）。<wbr>屋外は<wbr>雨が<wbr>直接<wbr>かからない<wbr>場所</p></div>' +
           choiceList(LINE_AREAS.map(function (a) { return a === 'その他' ? 'その他の<wbr>地域' : a; }), LINE_AREAS.indexOf(state.area), 'line-dialog__list--grid') +
           '<div class="line-form" ' + (other ? '' : 'hidden') + ' data-other>' +
           '<p class="line-radios__note">エリア外の<wbr>場合、<wbr>設置を<wbr>お受け<wbr>できない<wbr>ことが<wbr>あります。</p>' +
