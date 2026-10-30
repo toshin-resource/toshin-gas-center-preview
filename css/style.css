@@ -743,7 +743,6 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
 /* 電話の日時：当日・お急ぎの方への電話の案内 */
 .line-dialog__urgent { margin: -4px 0 4px; padding: 10px 12px; border-radius: 10px; background: #fdecee; color: #8a1020; font-size: .85rem; font-weight: 700; line-height: 1.6; }
 .line-dialog__urgent a { display: inline-block; margin: 4px 14px 0 0; color: #b3001b; font-size: .95rem; }
-.line-dialog__urgent-area { display: inline-block; width: 100%; text-decoration: none; font-size: .78rem; font-weight: 700; color: #8a1020; }
 .line-form { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
 .line-form[hidden] { display: none; }
 .line-form__label { margin-top: 8px; font-size: .9rem; font-weight: 700; }

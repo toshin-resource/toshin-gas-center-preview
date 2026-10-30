@@ -330,7 +330,7 @@
         return '<h2 class="line-dialog__title" id="line-dialog-title">お電話の<wbr>ご希望を<wbr>教えてください</h2>' +
           '<p class="line-dialog__lead">明日以降の<wbr>平日・土曜日、<wbr><span class="nw">9:00〜17:00</span>の間で<wbr>お選びください。<wbr>日曜日・祝日は<wbr>お休みです。</p>' +
           '<p class="line-dialog__urgent">本日中の<wbr>ご連絡を<wbr>希望の方・<wbr>お急ぎの方は、<wbr>お電話ください。<br>' +
-          '<a href="tel:0867445552">真庭地域の方 <span class="nw">0867-44-5552</span><span class="line-dialog__urgent-area">（美作市・<wbr>苫田郡・<wbr>勝田郡・<wbr>久米郡の方も<wbr>こちら）</span></a><a href="tel:0868201653">津山地域の方 <span class="nw">0868-20-1653</span></a></p>' +
+          '<a href="tel:0867445552">真庭市の方 <span class="nw">0867-44-5552</span></a><a href="tel:0868201653">津山市・美作市・<wbr>苫田郡・勝田郡・<wbr>久米郡の方 <span class="nw">0868-20-1653</span></a></p>' +
           '<div class="line-form">' +
           '<label class="line-form__label" for="lf-date">ご希望の日</label>' +
           '<select class="line-form__input" id="lf-date">' + dateOptions(state.date) + '</select>' +
