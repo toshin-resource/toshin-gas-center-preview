@@ -1157,3 +1157,7 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 .video__frame .video__play { position: absolute; inset: 0; height: 100%; aspect-ratio: auto; border-radius: 0; box-shadow: none; }
 .video__frame .video__play img { opacity: 1; }
 .video__frame.is-playing .video__play { display: none; }
+/* YouTubeを読み込めない画面：サムネイルの代わりに紺の背景、ボタンの文字は「YouTubeで見る」 */
+.video__play.is-ext { background: var(--c-accent-dark, #16304a); }
+.video__play.is-ext img { visibility: hidden; }
+.video__play.is-ext .video__icon::before { content: "YouTubeで見る"; background: #fff; color: var(--c-accent); }

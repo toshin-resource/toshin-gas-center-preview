@@ -750,15 +750,31 @@
     wrap.appendChild(f);
     wrap.appendChild(btn);
     btn.addEventListener('click', function () {
+      if (ytOpenOutside(btn)) { return; }
       wrap.classList.add('is-playing');
       if (!ytIOS && f.contentWindow) { f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*'); }
     });
   };
+  // YouTubeを読み込めない画面（Claudeのプレビューや、YouTubeを止めているネットワークなど）では、
+  // サムネイルが表示されないので、それを目印に、押したときはYouTubeのページを新しいタブで開く
+  var ytOpenOutside = function (btn) {
+    if (!btn.classList.contains('is-ext')) { return false; }
+    window.open('https://www.youtube.com/watch?v=' + btn.getAttribute('data-yt'), '_blank', 'noopener');
+    return true;
+  };
+  var ytMarkExt = function (btn) {
+    var img = btn.querySelector('img');
+    if (!img) { return; }
+    var mark = function () { btn.classList.add('is-ext'); };
+    img.addEventListener('error', mark);
+    if (img.complete && img.naturalWidth === 0 && img.currentSrc) { mark(); }
+  };
   var ytTouch = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
   var ytButtons = document.querySelectorAll('.video__play[data-yt]');
   for (var y = 0; y < ytButtons.length; y++) {
+    ytMarkExt(ytButtons[y]);
     if (ytTouch) { ytCover(ytButtons[y]); continue; }
-    ytButtons[y].addEventListener('click', function () { ytFrame(this, true).focus(); });
+    ytButtons[y].addEventListener('click', function () { if (!ytOpenOutside(this)) { ytFrame(this, true).focus(); } });
   }
 
   // 動き：スクロールで要素をふわっと表示（「動きを減らす」設定の端末では何もしない）
