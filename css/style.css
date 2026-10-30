@@ -113,7 +113,6 @@ table { border-collapse: collapse; }
   .site-header__inner { flex-wrap: wrap; height: auto; row-gap: 0; }
   .brand { height: var(--header-h); justify-content: center; }
   .global-nav { order: 3; flex: 0 0 100%; position: relative; }
-  .global-nav::before { content: ""; position: absolute; top: 0; left: 50%; width: 100vw; margin-left: -50vw; border-top: 1px solid var(--c-line); }
   .global-nav ul { height: var(--nav-h); gap: 0; }
   .global-nav li { flex: 1 1 0; position: relative; height: 100%; }
   .global-nav li + li:not(.nav-contact)::before { content: ""; position: absolute; left: 0; top: 50%; height: 22px; margin-top: -11px; border-left: 1px solid var(--c-line); }
