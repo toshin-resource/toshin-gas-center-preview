@@ -785,14 +785,16 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
 .intro { display: none; }
 html.intro-on, html.intro-on body { overflow: hidden; }
 .intro-on .intro {
-  display: grid; place-items: center; position: fixed; inset: 0; z-index: 1000; padding: 16px;
+  /* 縦に「絵と文字」「スキップボタン」の順に並べる。絵と文字は残りの高さの真ん中、ボタンは画面の下の中央（重ならない） */
+  display: flex; flex-direction: column; align-items: center; position: fixed; inset: 0; z-index: 1000; padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
   background: radial-gradient(circle at 50% 38%, #ffffff 0, #eef3f9 58%, #e1e9f3 100%);
 }
 .intro-on .intro.is-hiding { opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility .6s; }
 /* オープニング中はトップの写真・見出しの動きを止めておき、消え始めたら再生 */
 .intro-on:not(.intro-leaving) .hero__media img, .intro-on:not(.intro-leaving) .hero__copy > * { animation-play-state: paused; }
-.intro__inner { display: flex; flex-direction: column; align-items: center; width: min(92vw, 560px); }
-.intro__stage { position: relative; width: 100%; aspect-ratio: 4 / 3; }
+.intro__inner { display: flex; flex-direction: column; align-items: center; width: min(92vw, 560px); margin: auto 0; }
+/* 画面の高さが足りないときは、絵だけを小さくして全体を収める（見出し・キャッチ・ロゴ・スキップボタンの分 約400pxを引いた高さに合わせる） */
+.intro__stage { position: relative; width: min(100%, max(200px, (100vh - 400px) * 4 / 3)); aspect-ratio: 4 / 3; }
 .intro__scene { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .intro__front { pointer-events: none; }
 .intro__scene .intro__lcd { font: 700 10px/1 "Courier New", monospace; fill: #7cf0a0; }
@@ -810,11 +812,11 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 .intro__title { margin: 0; font-size: clamp(1.7rem, 8vw, 2.6rem); font-weight: 900; line-height: 1.25; color: var(--c-logo-navy); letter-spacing: .06em; }
 .intro__shop { margin: 8px 0 0; font-size: clamp(.85rem, 3.8vw, 1.05rem); font-weight: 700; color: var(--c-muted); letter-spacing: .04em; }
 /* 縦が短い画面（小さいスマホ）では詰めて、スキップボタンと重ならないように */
-@media (max-height: 640px) { .intro__inner { width: min(84vw, 560px); } .intro__head { margin-bottom: 0; } .intro__kicker { margin-bottom: 4px; } .intro__shop { margin-top: 4px; } }
+@media (max-height: 640px) { .intro__inner { width: min(84vw, 560px); } .intro__stage { width: min(100%, max(180px, (100vh - 330px) * 4 / 3)); } .intro__head { margin-bottom: 0; } .intro__kicker { margin-bottom: 4px; } .intro__shop { margin-top: 4px; } }
 .intro__catch { font-size: clamp(1.25rem, 5vw, 1.9rem); font-weight: 700; color: var(--c-accent); letter-spacing: .08em; margin: 0 0 10px; }
 .intro__logo { display: block; height: 34px; width: auto; margin: 0 auto; }
 .intro__skip {
-  position: absolute; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); min-height: 44px; padding: 8px 18px;
+  flex: none; margin-top: 12px; min-height: 44px; padding: 8px 18px; white-space: nowrap;
   border: 1px solid #c9d3df; border-radius: 999px; background: rgba(255,255,255,.9); color: var(--c-text);
   font: 700 .9rem var(--font); cursor: pointer;
 }
