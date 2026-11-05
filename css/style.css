@@ -627,22 +627,20 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
   .rental-pop__big { font-size: 17px; }
 }
 /* 吹き出し：押すと申し込みの画面が開くことを知らせる。PC（バナーは左上）は下に、スマホ（バナーは右下）は上に出す。
-   色はとーまくんに合わせる（体の水色 #acd1f0、ふちの紺 #00106f）。しっぽは紺の三角（::before）の上に水色の三角（::after）を重ねてふちを出す */
+   色はとーまくんの輪郭の紺（#00106f）に白い文字 */
 .rental-pop__tip {
   position: absolute; left: 50%; top: calc(100% + 10px); transform: translateX(-50%);
-  padding: 4px 10px; border: 1.5px solid #00106f; border-radius: 8px; background: #acd1f0; color: #00106f;
+  padding: 5px 10px; border-radius: 8px; background: #00106f; color: #fff;
   font-size: 11px; font-weight: 700; line-height: 1.35; text-align: center; white-space: nowrap;
-  box-shadow: 0 3px 8px rgba(0, 16, 111, .25); pointer-events: none;
+  box-shadow: 0 3px 8px rgba(0, 16, 111, .3); pointer-events: none;
 }
-.rental-pop__tip::before, .rental-pop__tip::after {
-  content: ""; position: absolute; left: 50%; bottom: 100%; margin-left: -7px;
-  border: 7px solid transparent; border-bottom-color: #00106f;
+.rental-pop__tip::after {
+  content: ""; position: absolute; left: 50%; bottom: 100%; margin-left: -6px;
+  border: 6px solid transparent; border-bottom-color: #00106f;
 }
-.rental-pop__tip::after { margin-left: -5px; border-width: 5px; border-bottom-color: #acd1f0; }
 @media (max-width: 900px) {
-  .rental-pop__tip { top: auto; bottom: calc(100% + 10px); font-size: 10.5px; padding: 3px 8px; }
-  .rental-pop__tip::before, .rental-pop__tip::after { bottom: auto; top: 100%; border-bottom-color: transparent; border-top-color: #00106f; }
-  .rental-pop__tip::after { border-top-color: #acd1f0; }
+  .rental-pop__tip { top: auto; bottom: calc(100% + 10px); font-size: 10.5px; padding: 4px 8px; }
+  .rental-pop__tip::after { bottom: auto; top: 100%; border-bottom-color: transparent; border-top-color: #00106f; }
 }
 /* 吹き出しはふわふわ上下に動かして目に留まるように（PCは下へ、スマホは上へ） */
 @keyframes tip-bob { 0%, 100% { transform: translateX(-50%); } 50% { transform: translate(-50%, 3px); } }
