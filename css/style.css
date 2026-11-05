@@ -626,6 +626,31 @@ figcaption { font-size: .8rem; color: var(--c-muted); margin-top: 8px; line-heig
   .rental-pop__small { font-size: 8px; }
   .rental-pop__big { font-size: 17px; }
 }
+/* 吹き出し：押すと申し込みの画面が開くことを知らせる。PC（バナーは左上）は下に、スマホ（バナーは右下）は上に出す */
+.rental-pop__tip {
+  position: absolute; left: 50%; top: calc(100% + 10px); transform: translateX(-50%);
+  padding: 5px 10px; border-radius: 8px; background: #1d2087; color: #fff;
+  font-size: 11px; font-weight: 700; line-height: 1.35; text-align: center; white-space: nowrap;
+  box-shadow: 0 3px 8px rgba(29, 32, 135, .3); pointer-events: none;
+}
+.rental-pop__tip::after {
+  content: ""; position: absolute; left: 50%; bottom: 100%; margin-left: -6px;
+  border: 6px solid transparent; border-bottom-color: #1d2087;
+}
+@media (max-width: 900px) {
+  .rental-pop__tip { top: auto; bottom: calc(100% + 10px); font-size: 10.5px; padding: 4px 8px; }
+  .rental-pop__tip::after { bottom: auto; top: 100%; border-bottom-color: transparent; border-top-color: #1d2087; }
+}
+/* 吹き出しはふわふわ上下に動かして目に留まるように（PCは下へ、スマホは上へ） */
+@keyframes tip-bob { 0%, 100% { transform: translateX(-50%); } 50% { transform: translate(-50%, 3px); } }
+@keyframes tip-bob-up { 0%, 100% { transform: translateX(-50%); } 50% { transform: translate(-50%, -3px); } }
+@media (prefers-reduced-motion: no-preference) {
+  .rental-pop__tip { animation: tip-bob 2.4s ease-in-out infinite; }
+  .intro-on:not(.intro-leaving) .rental-pop__tip { animation-play-state: paused; }
+}
+@media (prefers-reduced-motion: no-preference) and (max-width: 900px) {
+  .rental-pop__tip { animation-name: tip-bob-up; }
+}
 /* とーまくん：ふだんは乾燥機の後ろに隠れていて、ときどき体を傾けて横から顔をのぞかせる。
    PC（バナーは左上）は右から、スマホ（バナーは右下）は左からのぞく */
 .rental-pop__peek { position: absolute; right: 6%; bottom: 6%; width: 82%; height: auto; transform-origin: 50% 100%; pointer-events: none; }
